@@ -1,0 +1,64 @@
+from copy import copy
+from datetime import datetime
+from typing import Any, Dict, List
+from data_parser import File_Data_Source
+from data_processor import Processor
+from definitions import SENSOR_COEFFICIENTS
+import matplotlib.pyplot as plt
+
+#analyze and plot data from the various sources
+class Analyzer:
+    """constructor"""
+    def __init__(self, processor:Processor) -> None:
+        self.source: File_Data_Source = processor.source
+        self.fields: List[str] = processor.fields
+        self.sensorID: int =processor.sensor_id
+        #restructure data such that it is a dictionary with the field name as the key and (a list of the data associated with the field) as the value
+        raw_data: List[Dict[str, Any]] = [ ( {"Date and Time": row[0]} | row[1] )for row in processor.data.items()] #list with dictionary of the data for every row
+        self.data: Dict[str,List[Any]] = { field: [ row.get(field) for row in raw_data ]  for field in processor.fields  }
+        
+    
+    def analyze(self):
+        # analyze data (if you want something you analyze to be on the graph, add it to self.data)
+        match self.source:
+            case File_Data_Source.WEATHER_STATION:
+                pass
+            case File_Data_Source.SAP_AND_MOISTURE_SENSOR:
+                # calc deltaT
+                self.data["ΔT"] = [ (x-1000)/20 for x in self.data.get("Value 1")]
+                minT = min(self.data.get("ΔT"))
+                #calc K
+                self.data["K"] = [ -(minT-dt)/dt for dt in self.data.get("ΔT")]
+                #calc sap flux density
+                self.data["Sap Flux Density"] = [ 118.99*pow(10,-6)*K  for K in self.data.get("K")]
+                #calc relative moisture
+                self.data["Relative Moisture %"] = [ (SENSOR_COEFFICIENTS[self.sensorID-1].get("a") * x) + SENSOR_COEFFICIENTS[self.sensorID-1].get("b") for x in self.data.get("Value 2")]
+                
+                #a and b coefficients are the slope and y-int of a line that goes between the coords (ave wet, 100) and (ave dry, 0), ave wet and ave dry are calculated from the calibration files and are sensor specific
+                
+            case _:
+                raise RuntimeError("desired data source not implemented yet")
+        
+        # plot data
+        plot(copy(self.data))
+        
+def plot(data: Dict[str,List[Any]]): 
+    x = data.get("Date and Time")
+    del data["Date and Time"]
+    
+    y_lists = [y for y in data.values() if type(y[0]) == type(1.0)]
+    titles = [k for k,y in data.items() if y in y_lists]
+    
+    for i in range(1,len(y_lists)):
+        plt.subplot(len(y_lists)//2,2,i)
+        plt.plot(x,y_lists[i])
+        plt.title("{}\n".format(titles[i]))
+        plt.xticks(rotation=90)
+        
+    plt.tight_layout(w_pad=2)
+    plt.show()
+    
+    
+    
+    
+        

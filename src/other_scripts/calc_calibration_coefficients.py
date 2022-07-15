@@ -1,7 +1,7 @@
 import csv
 import os
 
-from numpy import array, average
+from numpy import average
 
 
 ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..'))

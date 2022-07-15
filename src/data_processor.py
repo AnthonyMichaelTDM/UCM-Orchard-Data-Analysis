@@ -1,18 +1,26 @@
 #with the data, run various data analysis operations on it
+from curses.ascii import isalnum
 from datetime import datetime
 from data_parser import File_Data_Source
 from typing import Any, Dict, List
+from definitions import SOURCES_WITH_SENSOR_IDS
 
-
-class Processor: #processes data
-    data:Dict[datetime,Dict[str, Any]]={}
-    fields: List[str] = []
-    
+class Processor: #processes data    
     """constructor"""
     def __init__(self, data: List[Dict[str, Any]], data_source: File_Data_Source):
-        self.fields = data_source.get_field_names()
+        self.data: Dict[datetime,Dict[str, Any]] = {}
+        self.fields: List[str] = data_source.get_field_names()
+        self.source: File_Data_Source = data_source
+        self.sensor_id: int = 0
+        #if the data source has sensor ID's, store them here for later use
+        if data_source in SOURCES_WITH_SENSOR_IDS:
+            self.sensor_id = int( ''.join( [c for c in str(data[0].get("Sensor ID")) if c.isdecimal()] ) ) #extract all the numeric characters in data[0].get("Sensor ID") and convert the resulting string into an integer
+            if self.sensor_id <= 0:
+                raise RuntimeError("failed to determine sensor ID")
+        
+        #restructure data such that it is a dictionary with time as the key and (a dictionary with field name as key and data as value) as the value
         for row in data:
-            self.data[row.pop("Date and Time")] = row #restructure data such that it is a dictionary with time as the key and (a dictionary with field name as key and data as value) as value
+            self.data[row.pop("Date and Time")] = row 
     
     def __str__(self) -> str:
         #header
@@ -23,9 +31,6 @@ class Processor: #processes data
             str_rep += ','.join( [ str(v) for v in row_data.values()] ) + "\n"
         #return
         return str_rep
-        
-        
-        
     
     """removes the given field from data"""
     def remove_field(self, field_to_remove:str):
