@@ -35,7 +35,8 @@ class Parser:
     def parse(file_path: str, file_data_source: File_Data_Source) -> List[Dict[str, Any]]:
         # ensure file_path is a file
         if not os.path.isfile(file_path):
-            raise OSError("File Not Found")
+            # TODO: if a file is missing, try to download it from online
+            raise OSError("File `{}` Not Found".format(file_path))
         
         with open(file_path, mode='r', newline='') as csvfile:
             # get field names
@@ -54,7 +55,7 @@ class Parser:
 """
 Process a given parsed row of data from a csv file from the given source, 
 convert data from str to the appropriate type
-and re
+and return converted data
 """
 def process(row_data: Dict[str, str], data_source: File_Data_Source) -> Dict[str, Any]:
     #process row data appropriately for its data_source

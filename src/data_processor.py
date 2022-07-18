@@ -5,9 +5,10 @@ from data_parser import File_Data_Source
 from typing import Any, Dict, List
 from definitions import SOURCES_WITH_SENSOR_IDS
 
-class Processor: #processes data    
-    """constructor"""
+class Processor: 
+    """processes data"""    
     def __init__(self, data: List[Dict[str, Any]], data_source: File_Data_Source):
+        """constructor"""
         self.data: Dict[datetime,Dict[str, Any]] = {}
         self.fields: List[str] = data_source.get_field_names()
         self.source: File_Data_Source = data_source
@@ -20,7 +21,13 @@ class Processor: #processes data
         
         #restructure data such that it is a dictionary with time as the key and (a dictionary with field name as key and data as value) as the value
         for row in data:
-            self.data[row.pop("Date and Time")] = row 
+            if isinstance(row,list): #for some reason, the last row was a list containing all the data or something
+                del(row)
+                break
+            
+            date:datetime = row.get("Date and Time")
+            del row["Date and Time"]
+            self.data[date] = row 
     
     def __str__(self) -> str:
         #header
@@ -32,18 +39,18 @@ class Processor: #processes data
         #return
         return str_rep
     
-    """removes the given field from data"""
     def remove_field(self, field_to_remove:str):
+        """removes the given field from data"""
         for data_entry in self.data.values(): 
             del data_entry[field_to_remove]
         self.fields.remove(field_to_remove)
-    """removes the given fields from data"""
     def remove_fields(self, fields_to_remove: List[str]):
+        """removes the given fields from data"""
         for field in fields_to_remove:
             self.remove_field(field)
             
-    """remove data that's not in the given time frame"""
     def keep_time_range(self, from_datetime: datetime, to_datetime: datetime):
+        """remove data that's not in the given time frame"""
         data_to_keep: Dict[datetime, Dict[str, Any]] = {}
         for key in self.data.keys():
             if key >= from_datetime and key <= to_datetime:

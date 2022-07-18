@@ -4,12 +4,11 @@ from typing import Any, Dict, List
 from data_parser import File_Data_Source
 from data_processor import Processor
 from definitions import SENSOR_COEFFICIENTS
-import matplotlib.pyplot as plt
 
 #analyze and plot data from the various sources
 class Analyzer:
-    """constructor"""
     def __init__(self, processor:Processor) -> None:
+        """constructor"""
         self.source: File_Data_Source = processor.source
         self.fields: List[str] = processor.fields
         self.sensorID: int =processor.sensor_id
@@ -38,25 +37,6 @@ class Analyzer:
                 
             case _:
                 raise RuntimeError("desired data source not implemented yet")
-        
-        # plot data
-        plot(copy(self.data))
-        
-def plot(data: Dict[str,List[Any]]): 
-    x = data.get("Date and Time")
-    del data["Date and Time"]
-    
-    y_lists = [y for y in data.values() if type(y[0]) == type(1.0)]
-    titles = [k for k,y in data.items() if y in y_lists]
-    
-    for i in range(1,len(y_lists)):
-        plt.subplot(len(y_lists)//2,2,i)
-        plt.plot(x,y_lists[i])
-        plt.title("{}\n".format(titles[i]))
-        plt.xticks(rotation=90)
-        
-    plt.tight_layout(w_pad=2)
-    plt.show()
     
     
     

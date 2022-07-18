@@ -1,33 +1,53 @@
 from datetime import datetime
-import os
-from data_analyzer import Analyzer
-from data_parser import Parser, File_Data_Source
-from data_processor import Processor
-from definitions import ROOT_DIR
 
-# from here, call other scripts to choose and analyze data
+from wrapper import Wrapper
 
-'''
-usage:
 
-first call the Parser to parse the data, specify data source
 
-then call methods in data_analyzer to process the data
-- first process data with Processor (define what data is important, and what time frame is important)
+def get_int(prompt:str, min:int, max:int) -> int:
+    while True:
+        try:
+            value = int(input(prompt))
+            if value >= min and value <= max: 
+                return value
+            else:
+                print("invalid input, try again")
+        except:
+            print("invalid input, try again")
+def get_int_nomax(prompt:str, min:int) -> int:
+    while True:
+        try:
+            value = int(input(prompt))
+            if value >= min: 
+                return value
+            else:
+                print("invalid input, try again")
+        except:
+            print("invalid input, try again")
 
-then do stuff with the data, ie. plot it on a graph 
-'''
 
-#show off milestones
-file_path = os.path.join(ROOT_DIR, 'data', 'Data_TREWid1_22_04_almond.csv')
-file_source = File_Data_Source.SAP_AND_MOISTURE_SENSOR
-data = Parser.parse( file_path, file_source)
 
-processor = Processor(data, file_source)
-processor.remove_fields(['Field', 'Sensor ID'])
-processor.keep_time_range(datetime(year=2022, month=4, day=30, hour=0),datetime(year=2022, month=4, day=30, hour=23))
-#print(str(processor))
+##uncomment if you want to hardcode the time range rather than entering it in manually
+#Wrapper.run(1, datetime(2022,4,1,0,0), datetime(2022,6,1,0,0))
+#exit()
 
-analyzer = Analyzer(processor)
-analyzer.analyze()
+#read user input to determine what data to use
+sensorid:int = get_int("which sensors data do you want to look at (1-6)",1,6)
 
+print("specify a time range to look at:")
+startyear: int = get_int_nomax("\tstart year (2022-?): ", 2022)
+startmonth:int = get_int("\tstart month (1-12): ", 1, 12)
+startday:  int = get_int("\tstart day (1-31): ", 1, 31)
+starthour: int = get_int("\tstart hour (0-23): ", 0, 23)
+startmin:  int = get_int("\tstart minute (0-59): ", 0, 59)
+print("")
+endyear: int = get_int_nomax("\tend year (2022-?): ", 2022)
+endmonth:int = get_int("\tend month (1-12): ", 1, 12)
+endday:  int = get_int("\tend day (1-31): ", 1, 31)
+endhour: int = get_int("\tend hour (0-23): ", 0, 23)
+endmin:  int = get_int("\tend minute (0-59): ", 0, 59)
+
+startdate:datetime = datetime(year=startyear, month=startmonth, day=startday,hour=starthour,minute=startmin)
+enddate:datetime   = datetime(year=endyear, month=endmonth, day=endday,hour=endhour,minute=endmin)
+
+Wrapper.run(sensorid, startdate, enddate)
