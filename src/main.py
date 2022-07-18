@@ -32,7 +32,7 @@ def get_int_nomax(prompt:str, min:int) -> int:
 #exit()
 
 #read user input to determine what data to use
-sensorid:int = get_int("which sensors data do you want to look at (1-6)",1,6)
+sensorid:int = get_int("which sensors data do you want to look at (1-6): ",1,6)
 
 print("specify a time range to look at:")
 startyear: int = get_int_nomax("\tstart year (2022-?): ", 2022)
