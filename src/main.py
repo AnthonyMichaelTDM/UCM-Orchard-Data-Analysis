@@ -9,8 +9,9 @@ from wrapper import Wrapper
 
 def get_int(prompt:str, min:int, max:int) -> int:
     while True:
+        value = input(prompt)
         try:
-            value = int(input(prompt))
+            value = int(value)
             if value >= min and value <= max: 
                 return value
             else:
@@ -19,8 +20,9 @@ def get_int(prompt:str, min:int, max:int) -> int:
             print("invalid input, try again")
 def get_int_nomax(prompt:str, min:int) -> int:
     while True:
+        value = input(prompt)
         try:
-            value = int(input(prompt))
+            value = int(value)
             if value >= min: 
                 return value
             else:
