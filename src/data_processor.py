@@ -1,5 +1,4 @@
 #with the data, run various data analysis operations on it
-from curses.ascii import isalnum
 from datetime import datetime
 from data_parser import File_Data_Source
 from typing import Any, Dict, List

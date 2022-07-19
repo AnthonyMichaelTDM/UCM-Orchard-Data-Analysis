@@ -1,4 +1,3 @@
-from curses import start_color
 from datetime import datetime
 import os
 from data_analyzer import Analyzer
@@ -38,8 +37,6 @@ class Wrapper:
         sensor_analyzer.analyze()
         weather_analyzer = Analyzer(weather_processor)
         weather_analyzer.analyze()
-        
-        
         
         # plot data
         sensor_x = sensor_analyzer.data.get("Date and Time")

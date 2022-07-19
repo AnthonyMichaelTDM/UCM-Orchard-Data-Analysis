@@ -1,5 +1,3 @@
-from copy import copy
-from datetime import datetime
 from typing import Any, Dict, List
 from data_parser import File_Data_Source
 from data_processor import Processor
@@ -18,7 +16,10 @@ class Analyzer:
         
     
     def analyze(self):
-        # analyze data (if you want something you analyze to be on the graph, add it to self.data)
+        """analyze data depending on the source
+        
+        raises RuntimeError: if data source of self is not implemented yet
+        """
         match self.source:
             case File_Data_Source.WEATHER_STATION:
                 pass
@@ -34,7 +35,6 @@ class Analyzer:
                 self.data["Relative Moisture %"] = [ (SENSOR_COEFFICIENTS[self.sensorID-1].get("a") * x) + SENSOR_COEFFICIENTS[self.sensorID-1].get("b") for x in self.data.get("Value 2")]
                 
                 #a and b coefficients are the slope and y-int of a line that goes between the coords (ave wet, 100) and (ave dry, 0), ave wet and ave dry are calculated from the calibration files and are sensor specific
-                
             case _:
                 raise RuntimeError("desired data source not implemented yet")
     
