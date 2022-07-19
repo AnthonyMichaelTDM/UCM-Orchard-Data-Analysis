@@ -1,18 +1,15 @@
 #parses the CSV files and returns the data within
 import csv
-from enum import Enum
 import os
+import requests
 from datetime import datetime
+from enum import Enum
 from typing import Any, Dict, List
 
-'''
-todo:
--detect File_Data_Source automatically
-'''
+from definitions import BASE_URL
 
-
-"""Enum for handling data sources, all supported data sources are here"""
 class File_Data_Source(Enum):
+    """Enum for handling data sources, all supported data sources are here"""
     #enum states
     WEATHER_STATION = ["weather stations", ["Date and Time","Field","Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"]]
     SAP_AND_MOISTURE_SENSOR = ["sap flow / moisture sensors", ["Date and Time","Field","Sensor ID","Value 1","Value 2"]]
@@ -21,21 +18,23 @@ class File_Data_Source(Enum):
     def ___str___(self):
         return "csv files from {} have the following fields: {}".format(self.value[0], self.value[1])
     
-    """get the field names for this data source
-    
-    Returns:
-        List: string list of the expected field names in CSV files from this source
-    """
     def get_field_names(self) -> List[str]:
+        """get the field names for this data source
+
+        @return: a string list of the expected field names in CSV files from this source
+        """
         return self.value[1]
 
 class Parser:
     # return a list of the rows as dictionaries (with field names as keys, and data as values)
-    """ uses the csv module to parse the given file"""
     def parse(file_path: str, file_data_source: File_Data_Source) -> List[Dict[str, Any]]:
+        """uses the csv module to parse the given file"""
+        
         # ensure file_path is a file
         if not os.path.isfile(file_path):
             # TODO: if a file is missing, try to download it from online
+            #download_file(file_path)
+            # TODO: differentiate between if desired data is from almond or pistacio orchards (probably do this in wrapper.py, or add a variable to track what types of orchards have data that can be downloaded)
             raise OSError("File `{}` Not Found".format(file_path))
         
         with open(file_path, mode='r', newline='') as csvfile:
@@ -51,13 +50,32 @@ class Parser:
             reader = [x for x in reader] #convert reader to a list
             data = [process(x, file_data_source) for x in reader[1:]]
             return data
-        
-"""
-Process a given parsed row of data from a csv file from the given source, 
-convert data from str to the appropriate type
-and return converted data
-"""
+
+def download_file(file_path:str):
+    """
+    use the requests module to download a file from the webserver, then save it to the data folder
+    
+    @param file_path: absolute path of data file in data folder
+    @raises RuntimeError: if file could not be downloaded (url doesn't work/exist)
+    """
+    #extract file name from given file_path
+    file_name = os.path.basename(file_path)
+    url = os.path.join(BASE_URL, file_name)
+    #get file from webserver w/ requests library, raise error is this couldn't be done
+    try:
+        response = requests.get(url)
+    except:
+        raise RuntimeError("failed to connect to {}".format(url))
+    #save response to filepath
+    with open(file_path, "w") as file:
+        file.write(response.content)
+
 def process(row_data: Dict[str, str], data_source: File_Data_Source) -> Dict[str, Any]:
+    """
+    Process a given parsed row of data from a csv file from the given source, 
+    convert data from str to the appropriate type
+    and return converted data
+    """
     #process row data appropriately for its data_source
     processed_row: Dict[str, Any] = {}
     match data_source:
