@@ -30,7 +30,7 @@ class Parser:
             # return data
             reader = [x for x in reader] #convert reader to a list
             data = [process(x, file_data_source) for x in reader[1:]]
-            return data
+            return [ row for row in data if isinstance(row,dict) ] #ensure returned value is a list of dicts
 
 def download_file(file_path:str):
     """

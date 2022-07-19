@@ -19,13 +19,7 @@ class Processor:
         
         #restructure data such that it is a dictionary with time as the key and (a dictionary with field name as key and data as value) as the value
         for row in data:
-            if isinstance(row,list): #for some reason, the last row was a list containing all the data or something
-                del(row)
-                break
-            
-            date:datetime = row.get("Date and Time")
-            del row["Date and Time"]
-            self.data[date] = row 
+            self.data[row.pop("Date and Time")] = row
     
     def __str__(self) -> str:
         #header
@@ -39,6 +33,7 @@ class Processor:
     
     def remove_field(self, field_to_remove:str):
         """removes the given field from data"""
+        print(field_to_remove)
         for data_entry in self.data.values(): 
             del data_entry[field_to_remove]
         self.fields.remove(field_to_remove)
