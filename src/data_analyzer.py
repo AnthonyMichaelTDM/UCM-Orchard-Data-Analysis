@@ -1,12 +1,12 @@
 from typing import Any, Dict, List
 from data_processor import Processor
-from definitions import SENSOR_COEFFICIENTS, File_Data_Source
+from definitions import SENSOR_COEFFICIENTS, File_Data_Type
 
 #analyze and plot data from the various sources
 class Analyzer:
     def __init__(self, processor:Processor) -> None:
         """constructor"""
-        self.source: File_Data_Source = processor.source
+        self.source: File_Data_Type = processor.source
         self.fields: List[str] = processor.fields
         self.sensorID: int =processor.sensor_id
         #restructure data such that it is a dictionary with the field name as the key and (a list of the data associated with the field) as the value
@@ -20,9 +20,9 @@ class Analyzer:
         raises RuntimeError: if data source of self is not implemented yet
         """
         match self.source:
-            case File_Data_Source.WEATHER_STATION:
+            case File_Data_Type.WEATHER_STATION:
                 pass
-            case File_Data_Source.SAP_AND_MOISTURE_SENSOR:
+            case File_Data_Type.SAP_AND_MOISTURE_SENSOR:
                 # calc deltaT
                 self.data["ΔT"] = [ (x-1000)/20 for x in self.data.get("Value 1")]
                 minT = min(self.data.get("ΔT"))

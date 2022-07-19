@@ -4,11 +4,11 @@ import os
 import requests
 from datetime import datetime
 from typing import Any, Dict, List
-from definitions import BASE_URL, File_Data_Source
+from definitions import BASE_URL, File_Data_Type
 
 class Parser:
     # return a list of the rows as dictionaries (with field names as keys, and data as values)
-    def parse(file_path: str, file_data_source: File_Data_Source) -> List[Dict[str, Any]]:
+    def parse(file_path: str, file_data_source: File_Data_Type) -> List[Dict[str, Any]]:
         """uses the csv module to parse the given file"""
         
         # ensure file_path is a file
@@ -51,7 +51,7 @@ def download_file(file_path:str):
     with open(file_path, "w") as file:
         file.write(response.content)
 
-def process(row_data: Dict[str, str], data_source: File_Data_Source) -> Dict[str, Any]:
+def process(row_data: Dict[str, str], data_source: File_Data_Type) -> Dict[str, Any]:
     """
     Process a given parsed row of data from a csv file from the given source, 
     convert data from str to the appropriate type
@@ -60,7 +60,7 @@ def process(row_data: Dict[str, str], data_source: File_Data_Source) -> Dict[str
     #process row data appropriately for its data_source
     processed_row: Dict[str, Any] = {}
     match data_source:
-        case File_Data_Source.WEATHER_STATION: #if from a weather station
+        case File_Data_Type.WEATHER_STATION: #if from a weather station
             #process Date and Time
             processed_row["Date and Time"] = datetime.strptime(row_data.get("Date and Time"), "%Y-%m-%d %H:%M:%S")
             #process Field
@@ -75,7 +75,7 @@ def process(row_data: Dict[str, str], data_source: File_Data_Source) -> Dict[str
             processed_row["Altitude [m]"] = float(row_data.get("Altitude [m]"))
             #process VOC
             processed_row["VOC [kΩ]"] = float(row_data.get("VOC [kΩ]"))
-        case File_Data_Source.SAP_AND_MOISTURE_SENSOR: # if from a sap and moisture sensor
+        case File_Data_Type.SAP_AND_MOISTURE_SENSOR: # if from a sap and moisture sensor
             #process Date and Time
             processed_row["Date and Time"] = datetime.strptime(row_data.get("Date and Time"), "%Y-%m-%d %H:%M:%S")
             #process Field

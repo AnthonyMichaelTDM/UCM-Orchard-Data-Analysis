@@ -1,15 +1,15 @@
 #with the data, run various data analysis operations on it
 from datetime import datetime
 from typing import Any, Dict, List
-from definitions import SOURCES_WITH_SENSOR_IDS, File_Data_Source
+from definitions import SOURCES_WITH_SENSOR_IDS, File_Data_Type
 
 class Processor: 
     """processes data"""    
-    def __init__(self, data: List[Dict[str, Any]], data_source: File_Data_Source):
+    def __init__(self, data: List[Dict[str, Any]], data_source: File_Data_Type):
         """constructor"""
         self.data: Dict[datetime,Dict[str, Any]] = {}
         self.fields: List[str] = data_source.get_field_names()
-        self.source: File_Data_Source = data_source
+        self.source: File_Data_Type = data_source
         self.sensor_id: int = 0
         #if the data source has sensor ID's, store them here for later use
         if data_source in SOURCES_WITH_SENSOR_IDS:
