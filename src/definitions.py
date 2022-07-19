@@ -1,6 +1,24 @@
 import os
 
-from data_parser import File_Data_Source
+from enum import Enum
+from typing import List
+
+class File_Data_Source(Enum):
+    """Enum for handling data sources, all supported data sources are here"""
+    #enum states
+    WEATHER_STATION = ["weather stations", ["Date and Time","Field","Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"]]
+    SAP_AND_MOISTURE_SENSOR = ["sap flow / moisture sensors", ["Date and Time","Field","Sensor ID","Value 1","Value 2"]]
+    
+    
+    def ___str___(self):
+        return "csv files from {} have the following fields: {}".format(self.value[0], self.value[1])
+    
+    def get_field_names(self) -> List[str]:
+        """get the field names for this data source
+
+        @return: a string list of the expected field names in CSV files from this source
+        """
+        return self.value[1]
 
 #root directory of project
 ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))

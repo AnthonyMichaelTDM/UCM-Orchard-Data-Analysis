@@ -1,8 +1,7 @@
 #with the data, run various data analysis operations on it
 from datetime import datetime
-from data_parser import File_Data_Source
 from typing import Any, Dict, List
-from definitions import SOURCES_WITH_SENSOR_IDS
+from definitions import SOURCES_WITH_SENSOR_IDS, File_Data_Source
 
 class Processor: 
     """processes data"""    

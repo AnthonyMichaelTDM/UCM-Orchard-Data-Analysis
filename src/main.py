@@ -3,6 +3,9 @@ from datetime import datetime
 from wrapper import Wrapper
 
 
+##uncomment if you want to hardcode the time range rather than entering it in manually
+Wrapper.run(0, datetime(2022,4,1,0,0), datetime(2022,6,1,0,0))
+exit()
 
 def get_int(prompt:str, min:int, max:int) -> int:
     while True:
@@ -25,14 +28,8 @@ def get_int_nomax(prompt:str, min:int) -> int:
         except:
             print("invalid input, try again")
 
-
-
-##uncomment if you want to hardcode the time range rather than entering it in manually
-#Wrapper.run(1, datetime(2022,4,1,0,0), datetime(2022,6,1,0,0))
-#exit()
-
 #read user input to determine what data to use
-sensorid:int = get_int("which sensors data do you want to look at (1-6): ",1,6)
+sensorid:int = get_int("which sensors data do you want to look at (1-6, 0 for all): ",0,6)
 
 print("specify a time range to look at:")
 startyear: int = get_int_nomax("\tstart year (2022-?): ", 2022)

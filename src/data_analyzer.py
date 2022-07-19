@@ -1,7 +1,6 @@
 from typing import Any, Dict, List
-from data_parser import File_Data_Source
 from data_processor import Processor
-from definitions import SENSOR_COEFFICIENTS
+from definitions import SENSOR_COEFFICIENTS, File_Data_Source
 
 #analyze and plot data from the various sources
 class Analyzer:

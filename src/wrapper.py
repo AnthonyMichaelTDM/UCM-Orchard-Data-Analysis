@@ -1,9 +1,9 @@
 from datetime import datetime
 import os
 from data_analyzer import Analyzer
-from data_parser import Parser, File_Data_Source
+from data_parser import Parser
 from data_processor import Processor
-from definitions import ROOT_DIR, SENSOR_IDS
+from definitions import ROOT_DIR, SENSOR_IDS, File_Data_Source
 import matplotlib.pyplot as plt
 
 class Wrapper:
