@@ -8,7 +8,7 @@ class Processor:
     def __init__(self, data: List[Dict[str, Any]], data_source: File_Data_Type):
         """constructor"""
         self.data: Dict[datetime,Dict[str, Any]] = {}
-        self.fields: List[str] = data_source.get_field_names()
+        self.fields: List[str] = data_source.get_field_names().copy()
         self.source: File_Data_Type = data_source
         self.sensor_id: int = 0
         #if the data source has sensor ID's, store them here for later use
@@ -33,7 +33,6 @@ class Processor:
     
     def remove_field(self, field_to_remove:str):
         """removes the given field from data"""
-        print(field_to_remove)
         for data_entry in self.data.values(): 
             del data_entry[field_to_remove]
         self.fields.remove(field_to_remove)
