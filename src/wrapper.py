@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from typing import Dict, List
 from data_analyzer import Analyzer
@@ -14,8 +14,8 @@ class Wrapper:
     def run(sensorid:int, startdate:datetime, enddate:datetime):
         if sensorid == 0:
             #run for all sensors
-            pass
-            #Wrapper.__runall(startdate, enddate)
+            #pass
+            Wrapper.__runall(startdate, enddate) # doesn't work well on large time frames
         elif sensorid in SENSOR_IDS:
             Wrapper.__run(sensorid,startdate,enddate)
         else:
@@ -36,6 +36,9 @@ class Wrapper:
         # trim data to timeframe
         sensor_processor.keep_time_range(startdate, enddate)
         weather_processor.keep_time_range(startdate, enddate)
+        # smoothen data to 30 minute intervals
+        sensor_processor.smoothen_data(startdate, timedelta(minutes=30)) 
+        weather_processor.smoothen_data(startdate, timedelta(minutes=30))
         
         # analyze sensor data
         sensor_analyzer = Analyzer(sensor_processor)
@@ -86,6 +89,8 @@ class Wrapper:
             sensor_processor.remove_fields(['Field','Sensor ID'])
             # trim data to timeframe
             sensor_processor.keep_time_range(startdate, enddate)
+            # smoothen data to 30 minute intervals
+            sensor_processor.smoothen_data(startdate, timedelta(minutes=30))
             # analyze sensor data
             sensor_analyzer = Analyzer(sensor_processor)
             sensor_analyzer.analyze()
@@ -98,7 +103,7 @@ class Wrapper:
             #plot sensor data
             for i, y_list in enumerate(sensor_y_lists):
                 plt.subplot(2,3,i+1)
-                plt.plot(sensor_x,y_list, linewidth=0.5, label="TREW {}".format(sensor))
+                plt.plot(sensor_x,y_list, linewidth=0.5, label="{}".format(sensor))
                 plt.title("{}\n".format(sensor_titles[i]))
                 plt.xticks(rotation=45)
                 plt.legend()
@@ -108,6 +113,7 @@ class Wrapper:
         weather_processor = Processor(weather_data, File_Data_Type.WEATHER_STATION)
         weather_processor.remove_fields(['Field','Altitude [m]'])
         weather_processor.keep_time_range(startdate, enddate)
+        weather_processor.smoothen_data(startdate, timedelta(minutes=30)) 
         weather_analyzer = Analyzer(weather_processor)
         weather_analyzer.analyze()
         weather_x = weather_analyzer.data.get("Date and Time")

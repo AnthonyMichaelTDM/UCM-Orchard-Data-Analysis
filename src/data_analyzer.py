@@ -23,6 +23,8 @@ class Analyzer:
             case File_Data_Type.WEATHER_STATION:
                 pass
             case File_Data_Type.SAP_AND_MOISTURE_SENSOR:
+                if not ("Value 1" in self.data and "Value 2" in self.data):
+                    raise RuntimeError("Value 1 or Value 2 missing")
                 # calc deltaT
                 self.data["ΔT"] = [ (x-1000)/20 for x in self.data.get("Value 1")]
                 minT = min(self.data.get("ΔT"))

@@ -1,6 +1,8 @@
 #with the data, run various data analysis operations on it
-from datetime import datetime
+from datetime import datetime, timedelta
+from re import T
 from typing import Any, Dict, List
+import warnings
 from definitions import SOURCES_WITH_SENSOR_IDS, File_Data_Type
 
 class Processor: 
@@ -33,9 +35,13 @@ class Processor:
     
     def remove_field(self, field_to_remove:str):
         """removes the given field from data"""
-        for data_entry in self.data.values(): 
-            del data_entry[field_to_remove]
+        for data_entry in self.data.values():
+            if field_to_remove in data_entry:
+                del data_entry[field_to_remove]
+            else:
+                warnings.warn("field {} is missing".format(field_to_remove))
         self.fields.remove(field_to_remove)
+        
     def remove_fields(self, fields_to_remove: List[str]):
         """removes the given fields from data"""
         for field in fields_to_remove:
@@ -51,4 +57,44 @@ class Processor:
         self.data.clear()
         self.data = data_to_keep
     
+    def smoothen_data(self, starttime:datetime, interval: timedelta):
+        """smoothen data out, storing average readings in every `interval` starting at `starttime`"""
+        smooth_data: Dict[datetime,Dict[str, Any]] = {}
+        
+        #calc count and sum
+        for timestamp, data in self.data.items():
+            #calculate time interval this row falls into
+            units_from_start = (timestamp-starttime) // interval
+            timegroup = starttime + (interval * units_from_start)
+            smooth_data[timegroup] = {}
+            
+            # update count for this time interval
+            if not "Count" in smooth_data[timegroup]:
+                smooth_data[timegroup]['Count'] = 1
+            else: 
+                smooth_data[timegroup]['Count'] += 1
+            # update sum for all numeric data
+            for field, fielddata in data.items():
+                if type(fielddata) in (int, float):
+                    if not field in smooth_data[timegroup]:
+                        smooth_data[timegroup][field] = 0
+                    smooth_data[timegroup][field] += fielddata
+                else: 
+                    smooth_data[timegroup][field] = fielddata
+                    
+        #calc average from count and sum
+        for data in smooth_data.values():
+            count = data.get('Count')
+            del data['Count']
+            
+            for fielddata in data.values():
+                if type(fielddata) in (int, float):
+                    fielddata /= count
+                    
+        self.data.clear()
+        self.data = smooth_data
+            
+            
+                    
+                    
             

@@ -4,8 +4,8 @@ from wrapper import Wrapper
 
 
 ##uncomment if you want to hardcode the time range rather than entering it in manually
-#Wrapper.run(1, datetime(2022,4,1,0,0), datetime(2022,6,30,23,59))
-#exit()
+Wrapper.run(0, datetime(2022,4,27,0,0), datetime(2022,4,28,0,0))
+exit()
 
 def get_int(prompt:str, min:int, max:int) -> int:
     while True:

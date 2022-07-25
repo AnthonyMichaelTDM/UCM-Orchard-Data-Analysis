@@ -27,7 +27,7 @@ class Parser:
             csvfile.seek(0)
             reader = csv.DictReader(csvfile, fieldnames=fieldnames, dialect=dialect)
             
-            # return data
+            # convert data into useful format
             reader = [x for x in reader] #convert reader to a list
             data = [process(x, file_data_source) for x in reader[1:]]
             return [ row for row in data if isinstance(row,dict) ] #ensure returned value is a list of dicts
