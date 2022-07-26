@@ -69,7 +69,7 @@ class Wrapper:
             plt.plot(weather_x,weather_y_lists[i])
             plt.title("{}\n".format(weather_titles[i]))
             plt.xticks(rotation=45)
-        plt.tight_layout()
+        plt.tight_layout(pad=0.3, rect=[0,0,1,1])
         plt.show()
         
     def __runall(startdate:datetime, enddate:datetime):
@@ -122,12 +122,12 @@ class Wrapper:
         weather_y_lists = [weather_analyzer.data.get(title) for title in weather_titles]
         #plot weather data
         for i, y_list in enumerate(weather_y_lists):
-            plt.subplot(2,3,i+1 + 2) #index +1 + lenth of sensor_y_lists (plots being used for sensor data)
+            plt.subplot(2,3,i+1 + 2) #index +1 + number of plots being used for sensor data)
             plt.plot(weather_x,weather_y_lists[i])
             plt.title("{}\n".format(weather_titles[i]))
             plt.xticks(rotation=45)
             
-        plt.tight_layout()
+        plt.tight_layout(pad=0.3, rect=[0,0,1,1])
         plt.show()
         
     def __get_almond_sensor_data(sensorid:int, startdate:datetime, enddate:datetime): 
