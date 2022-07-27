@@ -6,7 +6,7 @@ from wrapper import Wrapper
 ##uncomment if you want to hardcode the time range rather than entering it in manually
 Wrapper.run(1, datetime(2022,6,1,0,0), datetime(2022,6,4,23,59))
 exit()
-
+#TODO: add let user choose between almond and pistaccio data, then if pistaccio have them choose the weather station id
 def get_int(prompt:str, min:int, max:int) -> int:
     while True:
         value = input(prompt)

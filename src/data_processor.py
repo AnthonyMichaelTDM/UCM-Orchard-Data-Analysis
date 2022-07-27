@@ -3,15 +3,15 @@ from datetime import datetime, timedelta
 from re import T
 from typing import Any, Dict, List
 import warnings
-from definitions import SOURCES_WITH_SENSOR_IDS, File_Data_Type
+from definitions import SOURCES_WITH_SENSOR_IDS, Data_Sensor_Type
 
 class Processor: 
     """processes data"""    
-    def __init__(self, data: List[Dict[str, Any]], data_source: File_Data_Type):
+    def __init__(self, data: List[Dict[str, Any]], data_source: Data_Sensor_Type):
         """constructor"""
         self.data: Dict[datetime,Dict[str, Any]] = {}
         self.fields: List[str] = data_source.get_field_names().copy()
-        self.source: File_Data_Type = data_source
+        self.source: Data_Sensor_Type = data_source
         self.sensor_id: int = 0
         #if the data source has sensor ID's, store them here for later use
         if data_source in SOURCES_WITH_SENSOR_IDS:

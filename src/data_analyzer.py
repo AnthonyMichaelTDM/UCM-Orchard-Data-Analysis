@@ -1,13 +1,13 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Tuple
 from data_processor import Processor
-from definitions import SENSOR_COEFFICIENTS, File_Data_Type
+from definitions import SENSOR_COEFFICIENTS, Data_Sensor_Type
 
 #analyze and plot data from the various sources
 class Analyzer:
     def __init__(self, processor:Processor) -> None:
         """constructor"""
-        self.source: File_Data_Type = processor.source
+        self.source: Data_Sensor_Type = processor.source
         self.fields: List[str] = processor.fields
         self.sensorID: int =processor.sensor_id
         #restructure data such that it is a dictionary with the field name as the key and (a list of the data associated with the field) as the value
@@ -25,9 +25,9 @@ class Analyzer:
             raise RuntimeError("one or more kv pairs in self.data have empty lists as values, there is likely a hole in the data for the desired timeframe")
             
         match self.source:
-            case File_Data_Type.WEATHER_STATION:
+            case Data_Sensor_Type.WEATHER_STATION:
                 pass
-            case File_Data_Type.SAP_AND_MOISTURE_SENSOR:
+            case Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR:
                 if not ("Value 1" in self.data and "Value 2" in self.data and "Date and Time" in self.data):
                     raise RuntimeError("Value 1, Value 2, or Date and Time missing from data")
                 # calc deltaT

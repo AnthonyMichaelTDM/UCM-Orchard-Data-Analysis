@@ -5,16 +5,16 @@ from attr import field
 import requests
 from datetime import datetime
 from typing import Any, Dict, List
-from definitions import BASE_URL, File_Data_Type
+from definitions import BASE_URL, Data_Sensor_Type
 
 class Parser:
     
     # return a list of the rows as dictionaries (with field names as keys, and data as values)
-    def parse(file_path: str, file_data_source: File_Data_Type) -> List[Dict[str, Any]]:
+    def parse(file_path: str, file_data_source: Data_Sensor_Type) -> List[Dict[str, Any]]:
         """uses the csv module to parse the given file"""
         # ensure file_path is a file
         if not os.path.isfile(file_path):
-            # TODO: if a file is missing, try to download it from online
+            # TODO: if a file is missing, try to download it from online NOTE: only the pistacio data is online
             data = download_from_webserver(file_path, file_data_source)
             return data
             # TODO: differentiate between if desired data is from almond or pistacio orchards (probably do this in wrapper.py, or add a variable to track what types of orchards have data that can be downloaded)
@@ -34,7 +34,7 @@ class Parser:
             data = [process(x, file_data_source) for x in reader[1:]]
             return data
 
-def download_from_webserver(file_path:str, data_source: File_Data_Type):
+def download_from_webserver(file_path:str, data_source: Data_Sensor_Type):
     """
     use the requests module to download a file from the webserver, then save it to the data folder
     
@@ -47,8 +47,8 @@ def download_from_webserver(file_path:str, data_source: File_Data_Type):
     id = 0
     match data_source:
         #case File_Data_Type.WEATHER_STATION:
-            #pass
-        case File_Data_Type.SAP_AND_MOISTURE_SENSOR:
+            #filenamelist = file_name.split(sep='_')
+        case Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR:
             filenamelist = file_name.split(sep='_') # ["Data", "TREWid{id}", "{year}", "{month}", "almond.csv"]
             id=int(''.join([x for x in str(filenamelist[1]) if x.isnumeric()]))
             subpath = os.path.join("trew","?id={id}&m={month}&y={year}".format(
@@ -70,7 +70,7 @@ def download_from_webserver(file_path:str, data_source: File_Data_Type):
     formatted_response: List[Dict[str,Any]] = []
     fields = data_source.get_web_headers() + [field for field in data_source.get_field_names() if not field in data_source.get_web_headers()]
     match data_source:
-        case File_Data_Type.SAP_AND_MOISTURE_SENSOR:
+        case Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR:
             for row in response.split(sep=';')[:-1].reverse(): #all but last index because response ends in a semi-colon
                 formattedrow: Dict[str,Any] = process(
                     dict(zip(
@@ -86,7 +86,7 @@ def download_from_webserver(file_path:str, data_source: File_Data_Type):
     #return formatted response
     return formatted_response
 
-def process(row_data: Dict[str, str], data_source: File_Data_Type) -> Dict[str, Any]:
+def process(row_data: Dict[str, str], data_source: Data_Sensor_Type) -> Dict[str, Any]:
     """
     Process a given parsed row of data from a csv file from the given source, 
     convert data from str to the appropriate type
@@ -95,7 +95,7 @@ def process(row_data: Dict[str, str], data_source: File_Data_Type) -> Dict[str, 
     #process row data appropriately for its data_source
     processed_row: Dict[str, Any] = {}
     match data_source:
-        case File_Data_Type.WEATHER_STATION: #if from a weather station
+        case Data_Sensor_Type.WEATHER_STATION: #if from a weather station
             #process Date and Time
             processed_row["Date and Time"] = datetime.strptime(row_data.get("Date and Time"), "%Y-%m-%d %H:%M:%S")
             #process Field
@@ -110,7 +110,7 @@ def process(row_data: Dict[str, str], data_source: File_Data_Type) -> Dict[str, 
             processed_row["Altitude [m]"] = float(row_data.get("Altitude [m]"))
             #process VOC
             processed_row["VOC [kΩ]"] = float(row_data.get("VOC [kΩ]"))
-        case File_Data_Type.SAP_AND_MOISTURE_SENSOR: # if from a sap and moisture sensor
+        case Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR: # if from a sap and moisture sensor
             #process Date and Time
             processed_row["Date and Time"] = datetime.strptime(row_data.get("Date and Time"), "%Y-%m-%d %H:%M:%S")
             #process Field
