@@ -1,22 +1,24 @@
 #parses the CSV files and returns the data within
 import csv
 import os
+from attr import field
 import requests
 from datetime import datetime
 from typing import Any, Dict, List
 from definitions import BASE_URL, File_Data_Type
 
 class Parser:
+    
     # return a list of the rows as dictionaries (with field names as keys, and data as values)
     def parse(file_path: str, file_data_source: File_Data_Type) -> List[Dict[str, Any]]:
         """uses the csv module to parse the given file"""
-        
         # ensure file_path is a file
         if not os.path.isfile(file_path):
             # TODO: if a file is missing, try to download it from online
-            #download_file(file_path)
+            data = download_from_webserver(file_path, file_data_source)
+            return data
             # TODO: differentiate between if desired data is from almond or pistacio orchards (probably do this in wrapper.py, or add a variable to track what types of orchards have data that can be downloaded)
-            raise OSError("File `{}` Not Found".format(file_path))
+            #raise OSError("File `{}` Not Found".format(file_path))
         
         with open(file_path, mode='r', newline='') as csvfile:
             # get field names
@@ -30,26 +32,59 @@ class Parser:
             # convert data into useful format
             reader = [x for x in reader] #convert reader to a list
             data = [process(x, file_data_source) for x in reader[1:]]
-            return [ row for row in data if isinstance(row,dict) ] #ensure returned value is a list of dicts
+            return data
 
-def download_file(file_path:str):
+def download_from_webserver(file_path:str, data_source: File_Data_Type):
     """
     use the requests module to download a file from the webserver, then save it to the data folder
     
     @param file_path: absolute path of data file in data folder
-    @raises RuntimeError: if file could not be downloaded (url doesn't work/exist)
+    @raises RuntimeError: if file could not be downloaded (url doesn't work/exist), or the given data source is not hosted on the webserver yet
     """
     #extract file name from given file_path
     file_name = os.path.basename(file_path)
-    url = os.path.join(BASE_URL, file_name)
+    subpath = ""
+    id = 0
+    match data_source:
+        #case File_Data_Type.WEATHER_STATION:
+            #pass
+        case File_Data_Type.SAP_AND_MOISTURE_SENSOR:
+            filenamelist = file_name.split(sep='_') # ["Data", "TREWid{id}", "{year}", "{month}", "almond.csv"]
+            id=int(''.join([x for x in str(filenamelist[1]) if x.isnumeric()]))
+            subpath = os.path.join("trew","?id={id}&m={month}&y={year}".format(
+                id=id,
+                month=int(filenamelist[3]),
+                year=int(filenamelist[2]),
+            ))
+        case _:
+            raise RuntimeError("Desired data source not yet implemented")
+    
+    url = os.path.join(BASE_URL, subpath)
     #get file from webserver w/ requests library, raise error is this couldn't be done
     try:
-        response = requests.get(url)
+        response = requests.get(url).content.decode('utf-8')
     except:
         raise RuntimeError("failed to connect to {}".format(url))
-    #save response to filepath
-    with open(file_path, "w") as file:
-        file.write(response.content)
+    
+    #convert response into the format returned by the Parse function ( List[Dict[str,any]])
+    formatted_response: List[Dict[str,Any]] = []
+    fields = data_source.get_web_headers() + [field for field in data_source.get_field_names() if not field in data_source.get_web_headers()]
+    match data_source:
+        case File_Data_Type.SAP_AND_MOISTURE_SENSOR:
+            for row in response.split(sep=';')[:-1].reverse(): #all but last index because response ends in a semi-colon
+                formattedrow: Dict[str,Any] = process(
+                    dict(zip(
+                        fields,
+                        row.split(sep=',') + ["unknown field","TREW {id}".format(id=id)] #need to add the data that the webserver is missing
+                    )),
+                    data_source
+                )
+                formatted_response.append(formattedrow)
+        case _:
+            raise RuntimeError("Desired data source not yet implemented")
+    
+    #return formatted response
+    return formatted_response
 
 def process(row_data: Dict[str, str], data_source: File_Data_Type) -> Dict[str, Any]:
     """

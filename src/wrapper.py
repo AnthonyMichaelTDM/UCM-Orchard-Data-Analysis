@@ -37,7 +37,7 @@ class Wrapper:
         sensor_processor.keep_time_range(startdate, enddate)
         weather_processor.keep_time_range(startdate, enddate)
         # smoothen data to 30 minute intervals
-        sensor_processor.smoothen_data(startdate, timedelta(minutes=30)) 
+        sensor_processor.smoothen_data(startdate, timedelta(minutes=60)) 
         weather_processor.smoothen_data(startdate, timedelta(minutes=30))
         
         # analyze sensor data
@@ -60,7 +60,7 @@ class Wrapper:
         #plot sensor data
         for i in range(0,len(sensor_y_lists)):
             plt.subplot(2,3,i+1)
-            plt.plot(sensor_x,sensor_y_lists[i])
+            plt.plot(sensor_x,[max(x,0) for x in sensor_y_lists[i]])
             plt.title("{}\n".format(sensor_titles[i]))
             plt.xticks(rotation=45)
         #plot weather data
@@ -73,7 +73,7 @@ class Wrapper:
         plt.show()
         
     def __runall(startdate:datetime, enddate:datetime):
-        """doesn't really work right now"""
+        """doesn't really work right now, data is just very cluttered"""
         #sensor data
         #parse data in years/months timeframe (needs to read multiple files)
         #if an error is thrown here it's probably because a file doesn't exist in ../data
@@ -93,7 +93,11 @@ class Wrapper:
             sensor_processor.smoothen_data(startdate, timedelta(minutes=30))
             # analyze sensor data
             sensor_analyzer = Analyzer(sensor_processor)
-            sensor_analyzer.analyze()
+            try:
+                sensor_analyzer.analyze()
+            except RuntimeError as e:
+                print("ERROR: {}\n\tskipping...".format(e.args[0]))
+                continue
             # plot data
             sensor_x = sensor_analyzer.data.get("Date and Time")
             del sensor_analyzer.data["Date and Time"]
@@ -103,7 +107,7 @@ class Wrapper:
             #plot sensor data
             for i, y_list in enumerate(sensor_y_lists):
                 plt.subplot(2,3,i+1)
-                plt.plot(sensor_x,y_list, linewidth=0.5, label="{}".format(sensor))
+                plt.plot(sensor_x,[max(x,0) for x in y_list], linewidth=0.5, label="{}".format(sensor))
                 plt.title("{}\n".format(sensor_titles[i]))
                 plt.xticks(rotation=45)
                 plt.legend()

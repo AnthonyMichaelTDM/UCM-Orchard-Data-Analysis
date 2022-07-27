@@ -19,6 +19,16 @@ class File_Data_Type(Enum):
         @return: a string list of the expected field names in CSV files from this source
         """
         return self.value[1]
+    
+    def get_web_headers(self):
+        """returns the headers used in the web-hosted data"""
+        match self:
+            case File_Data_Type.SAP_AND_MOISTURE_SENSOR:
+                return ["Date and Time", "Value 1", "Value 2"]
+            case _:
+                raise RuntimeError("desired data source not yet implemented")
+
+#TODO: add a file_data_source enum to distinguish between almond and pistacio data
 
 #root directory of project
 ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
@@ -30,7 +40,7 @@ SENSOR_IDS = [1,2,3,4,5,6] #DO NOT PUT 0 IN THIS LIST, or an infinite recursion 
 
 #base url to data files
 # TODO: update
-BASE_URL = "https://localhost"
+BASE_URL = "http://192.168.0.116/rehsani_local"
 
 #sensor calibration coefficients
 SENSOR_COEFFICIENTS = [

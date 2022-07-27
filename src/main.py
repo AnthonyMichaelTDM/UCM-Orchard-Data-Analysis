@@ -4,7 +4,7 @@ from wrapper import Wrapper
 
 
 ##uncomment if you want to hardcode the time range rather than entering it in manually
-Wrapper.run(0, datetime(2022,4,27,0,0), datetime(2022,4,28,0,0))
+Wrapper.run(1, datetime(2022,6,1,0,0), datetime(2022,6,4,23,59))
 exit()
 
 def get_int(prompt:str, min:int, max:int) -> int:
@@ -37,16 +37,12 @@ print("specify a time range to look at:")
 startyear: int = get_int_nomax("\tstart year (2022-?): ", 2022)
 startmonth:int = get_int("\tstart month (1-12): ", 1, 12)
 startday:  int = get_int("\tstart day (1-31): ", 1, 31)
-starthour: int = get_int("\tstart hour (0-23): ", 0, 23)
-startmin:  int = get_int("\tstart minute (0-59): ", 0, 59)
 print("")
 endyear: int = get_int_nomax("\tend year (2022-?): ", 2022)
 endmonth:int = get_int("\tend month (1-12): ", 1, 12)
 endday:  int = get_int("\tend day (1-31): ", 1, 31)
-endhour: int = get_int("\tend hour (0-23): ", 0, 23)
-endmin:  int = get_int("\tend minute (0-59): ", 0, 59)
 
-startdate:datetime = datetime(year=startyear, month=startmonth, day=startday,hour=starthour,minute=startmin)
-enddate:datetime   = datetime(year=endyear, month=endmonth, day=endday,hour=endhour,minute=endmin)
+startdate:datetime = datetime(year=startyear, month=startmonth, day=startday,hour=0,minute=0)
+enddate:datetime   = datetime(year=endyear, month=endmonth, day=endday,hour=23,minute=59)
 
 Wrapper.run(sensorid, startdate, enddate)
