@@ -22,7 +22,7 @@ class Wrapper:
                     Wrapper.__run(config=config, startdate=startdate, enddate=enddate, sap_sensorids=[sap_sensorid]) 
                 else:
                     raise RuntimeError("sensor(s) with given id(s) not found")
-            case Configs.PISTACIO:
+            case Configs.PISTACHIO:
                 #ensure all needed optional variables where given and call runner function
                 if ((not isinstance(sap_sensorid,type(None))) and sap_sensorid in config.get_sensor_ids(Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR)) and (
                     (not isinstance(weather_sensorid,type(None))) and weather_sensorid in config.get_sensor_ids(Data_Sensor_Type.WEATHER_STATION)
@@ -179,7 +179,7 @@ class Wrapper:
                         return sensor_data
                     case _:
                         raise RuntimeError("desired Data_Sensor_Type not yet implemented for this config")
-            case Configs.PISTACIO:
+            case Configs.PISTACHIO:
                 match sensor_type:
                     case Data_Sensor_Type.WEATHER_STATION:
                         sensor_data = []

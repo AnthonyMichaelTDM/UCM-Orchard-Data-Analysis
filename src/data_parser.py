@@ -113,7 +113,7 @@ def process(row_data: Dict[str, str], config:Configs, sensor_type: Data_Sensor_T
                     processed_row["Value 2"] = int(row_data.get("Value 2"))
                 case _:
                     raise RuntimeError("desired data source not implemented yet")
-        case Configs.PISTACIO:
+        case Configs.PISTACHIO:
             match sensor_type:
                 case Data_Sensor_Type.WEATHER_STATION: #if from a weather station
                     #process Date and Time
