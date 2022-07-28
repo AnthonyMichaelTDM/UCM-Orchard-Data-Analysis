@@ -1,13 +1,13 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Tuple
 from data_processor import Processor
-from definitions import SENSOR_COEFFICIENTS, Data_Sensor_Type
+from definitions import SAP_SENSOR_COEFFICIENTS, Data_Sensor_Type
 
 #analyze and plot data from the various sources
 class Analyzer:
     def __init__(self, processor:Processor) -> None:
         """constructor"""
-        self.source: Data_Sensor_Type = processor.source
+        self.source: Data_Sensor_Type = processor.sensor_type
         self.fields: List[str] = processor.fields
         self.sensorID: int =processor.sensor_id
         #restructure data such that it is a dictionary with the field name as the key and (a list of the data associated with the field) as the value
@@ -23,7 +23,8 @@ class Analyzer:
         """
         if any( [len(x)==0 for x in self.data.values()] ):
             raise RuntimeError("one or more kv pairs in self.data have empty lists as values, there is likely a hole in the data for the desired timeframe")
-            
+        
+        #TODO: if different sources (ie almond orchard or pistacio orchard) need to treat the data from teh same common sensor differently, you'll need to implement that here
         match self.source:
             case Data_Sensor_Type.WEATHER_STATION:
                 pass
@@ -41,7 +42,7 @@ class Analyzer:
                 #calc sap flux density
                 self.data["Sap Flux Density"] = [ 118.99*pow(10,-6)*K  for K in self.data.get("K")]
                 #calc relative moisture
-                self.data["Relative Moisture %"] = [ (SENSOR_COEFFICIENTS[self.sensorID-1].get("a") * x) + SENSOR_COEFFICIENTS[self.sensorID-1].get("b") for x in self.data.get("Value 2")]
+                self.data["Relative Moisture %"] = [ (SAP_SENSOR_COEFFICIENTS[self.sensorID-1].get("a") * x) + SAP_SENSOR_COEFFICIENTS[self.sensorID-1].get("b") for x in self.data.get("Value 2")]
                 
                 #a and b coefficients are the slope and y-int of a line that goes between the coords (ave wet, 100) and (ave dry, 0), ave wet and ave dry are calculated from the calibration files and are sensor specific
             case _:

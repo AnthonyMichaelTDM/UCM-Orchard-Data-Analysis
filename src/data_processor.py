@@ -1,24 +1,23 @@
 #with the data, run various data analysis operations on it
 from datetime import datetime, timedelta
-from re import T
 from typing import Any, Dict, List
-import warnings
-from definitions import SOURCES_WITH_SENSOR_IDS, Data_Sensor_Type
+from definitions import Configs, Data_Sensor_Type
 
 class Processor: 
     """processes data"""    
-    def __init__(self, data: List[Dict[str, Any]], data_source: Data_Sensor_Type):
+    def __init__(self, data: List[Dict[str, Any]], config:Configs, sensor_type: Data_Sensor_Type, sensor_id:int | None=None):
         """constructor"""
         self.data: Dict[datetime,Dict[str, Any]] = {}
-        self.fields: List[str] = data_source.get_field_names().copy()
-        self.source: Data_Sensor_Type = data_source
+        self.fields: List[str] = config.get_field_names(sensor_type)
+        self.sensor_type: Data_Sensor_Type = sensor_type
         self.sensor_id: int = 0
-        #if the data source has sensor ID's, store them here for later use
-        if data_source in SOURCES_WITH_SENSOR_IDS:
-            self.sensor_id = int( ''.join( [c for c in str(data[0].get("Sensor ID")) if c.isdecimal()] ) ) #extract all the numeric characters in data[0].get("Sensor ID") and convert the resulting string into an integer
-            if self.sensor_id <= 0:
-                raise RuntimeError("failed to determine sensor ID")
-        
+        #if the data source needs sensor ID's, ensure one was given
+        if config.needs_sensorid(sensor_type):
+            if (not isinstance(sensor_id,type(None))) and sensor_id in config.get_sensor_ids(sensor_type):
+                self.sensor_id = sensor_id
+            else:
+                raise RuntimeError("sensor_id parameter was either not given, or outside of valid range ({} to {} for this sensor)".format(min(config.get_sensor_ids),max(config.get_sensor_ids())))
+
         #restructure data such that it is a dictionary with time as the key and (a dictionary with field name as key and data as value) as the value
         for row in data:
             self.data[row.pop("Date and Time")] = row
@@ -38,9 +37,8 @@ class Processor:
         for data_entry in self.data.values():
             if field_to_remove in data_entry:
                 del data_entry[field_to_remove]
-            else:
-                warnings.warn("field {} is missing".format(field_to_remove))
-        self.fields.remove(field_to_remove)
+        if field_to_remove in self.fields:
+            self.fields.remove(field_to_remove)
         
     def remove_fields(self, fields_to_remove: List[str]):
         """removes the given fields from data"""
@@ -93,8 +91,4 @@ class Processor:
                     
         self.data.clear()
         self.data = smooth_data
-            
-            
-                    
-                    
-            
+        
