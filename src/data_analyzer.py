@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Tuple
+
+from more_itertools import is_sorted
 from data_processor import Processor
 from definitions import SAP_SENSOR_COEFFICIENTS, Data_Sensor_Type
 
@@ -49,45 +51,63 @@ class Analyzer:
                 raise RuntimeError("desired data source not implemented yet")
     
 def calc_minT_list(deltat_list:List[float], datetime_list:List[datetime]) -> List[float]:
+    """ given a list of ΔT's, and the equally sized list of datetimes those ΔT's were calculated for, 
+    return a list of minT's (the average ΔT between the hours of 0 and 7 (inclusive) (midnight to 7am)
+    
+    raise RuntimeError if datetime_list and deltat_list are not the same size"""
     tempminT:Dict[datetime,Tuple(float,int)] = {} # dictionary with time as key and a tuple of minT for the day AND dt readings throughout the day as values
-    prevdatetime = next(iter(datetime_list)) #get first key in date_T_dict in O(1) time
+    prevdatetime = 0 #previous datetime, used in loop
     nightreadingstotaldt = 0.0 #total dt between midnight and 7am for the day being processed
-    nightreadingscount = 0 # count of the dt's between midnight and 7am for the day being processed 
-    len_of_filtered_datetime_list = len([x for x in datetime_list if x.hour >= 0 and x.hour <= 7])
+    nightreadingscount = 0 # count of the dt's between midnight and 7am for the day being processed
     dayreadingscount = 0 # count of readings in the day being processed
     
+    datetimelen = len(datetime_list) #stored as a variable because it's used in 3 places (one of them is a loop), calculating the length each time is inefficient
+    deltatlen = len(deltat_list) #stored for consistency
+    if datetimelen != deltatlen :
+        raise RuntimeError("length of datetime_list ({}) does not equal that of deltat_list ({})".format(datetimelen,deltatlen))
+    
+    #run what would be the first iteration outside of the loop to initialize everything
+    prevdatetime=next(iter(datetime_list)) #using the next(iter( [] )) method because of it's O(1) time complexity
+    dayreadingscount = 1
+    if prevdatetime.hour >= 0 and prevdatetime.hour <= 7:
+        nightreadingstotaldt = next(iter(deltat_list))
+        nightreadingscount = 1
+        
     #create dict w/ date as key and deltaT as value
     #for every day, average the deltaT's and store in minT #minT should be the average ΔT values from hour 0 to 7 every day
-    for currdatetime,dt in dict(zip(datetime_list, deltat_list)).items():
-        timediff = currdatetime - prevdatetime
-        is_same_day = abs(timediff) < timedelta(days=1)
-        if is_same_day:
+    for i,(currdatetime,dt) in enumerate(dict(zip(datetime_list[1:], deltat_list[1:])).items()): #skips first indexes because those are "used" during initialization
+        #if it's the same day
+        if currdatetime.day==prevdatetime.day and currdatetime.month==prevdatetime.month  and  currdatetime.year==prevdatetime.year: 
+            #for mint calculations, ignore keys where hour is not between 0 and 7
+            if currdatetime.hour >= 0 and currdatetime.hour <= 7:
+                #if night and same day, update values
+                nightreadingstotaldt += dt
+                nightreadingscount += 1
+                
+            #update count for day
             dayreadingscount += 1
         else:
+            #for mint calculations, ignore keys where hour is not between 0 and 7
+            if currdatetime.hour >= 0 and currdatetime.hour <= 7:
+                # if night but not same day, store past values, then reset values 
+                tempminT[datetime(prevdatetime.year,prevdatetime.month,prevdatetime.day)] = (nightreadingstotaldt / nightreadingscount,dayreadingscount)
+                nightreadingstotaldt = dt
+                nightreadingscount = 1
+                
+            #reset count for day
             dayreadingscount = 1
         
-        #for calculations, ignore keys where hour is not between 0 and 7
-        if currdatetime.hour >= 0 and currdatetime.hour <= 7:
-            if is_same_day and nightreadingscount < len_of_filtered_datetime_list -1: #if it's the same day and not the last valid iteration,
-                nightreadingstotaldt += dt
-                nightreadingscount += 1
-            elif not nightreadingscount < len_of_filtered_datetime_list -1: #it's the last iteration
-                nightreadingstotaldt += dt
-                nightreadingscount += 1
-                tempminT[datetime(currdatetime.year,currdatetime.month,currdatetime.day)] = (nightreadingstotaldt / nightreadingscount,dayreadingscount)
-                nightreadingscount = 0
-                nightreadingstotaldt = 0
-            else:
-                tempminT[datetime(currdatetime.year,currdatetime.month,currdatetime.day)] = (nightreadingstotaldt / nightreadingscount,dayreadingscount)
-                nightreadingscount = 1
-                nightreadingstotaldt = dt
+        #because mint values are stored when the "next day" starts, it is necessary to explicityly store the data on the last iteration of the loop so that the data from the last day isn't ignored
+        if i+1 >= datetimelen-1: #the +1 is because len returns the number of elements in an array, not the index of the last element (which is 1 less)
+                                 #the -1 is there because we skip the first element of datetime when making the enumerated iterator this loop iterates over
+            tempminT[datetime(prevdatetime.year,prevdatetime.month,prevdatetime.day)] = (nightreadingstotaldt / nightreadingscount,dayreadingscount)
         
         prevdatetime = currdatetime
-            
+        
     #build up minT list of same size as datetime_list, and return it
     minT_list = []
-    for ttup in tempminT.values():
-        minT_list.extend( [ttup[0] for n in range(ttup[1])] )
+    for t_tup in tempminT.values():
+        minT_list.extend( [t_tup[0] for n in range(t_tup[1])] )
     return minT_list
 
     
