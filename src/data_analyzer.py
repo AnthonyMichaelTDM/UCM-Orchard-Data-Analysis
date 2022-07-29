@@ -42,9 +42,10 @@ class Analyzer:
                 #calc K
                 self.data["K"] = [ -( self.data.get("minT")[i] -dt)/dt for i,dt in enumerate(self.data.get("ΔT"))]
                 #calc sap flux density
-                self.data["Sap Flux Density"] = [ 118.99*pow(10,-6)*K  for K in self.data.get("K")]
+                self.data["Sap Flux Density"] = [ max(0,118.99*pow(10,-6)*K ) for K in self.data.get("K")] #make sure it's not negative
                 #calc relative moisture
-                self.data["Relative Moisture %"] = [ (SAP_SENSOR_COEFFICIENTS[self.sensorID-1].get("a") * x) + SAP_SENSOR_COEFFICIENTS[self.sensorID-1].get("b") for x in self.data.get("Value 2")]
+                self.data["Relative Moisture %"] = [ max(0,min(100,(SAP_SENSOR_COEFFICIENTS[self.sensorID-1].get("a") * x) + SAP_SENSOR_COEFFICIENTS[self.sensorID-1].get("b"))) for x in self.data.get("Value 2")]
+                                                    #the max and min here ensure this value is between 0 and 100
                 
                 #a and b coefficients are the slope and y-int of a line that goes between the coords (ave wet, 100) and (ave dry, 0), ave wet and ave dry are calculated from the calibration files and are sensor specific
             case _:

@@ -5,7 +5,7 @@ from wrapper import Wrapper
 
 
 ##uncomment if you want to hardcode the time range rather than entering it in manually
-#Wrapper.run(Configs.PISTACHIO, datetime(2022,6,1,0,0), datetime(2022,6,2,23,59), sap_sensorid=3, weather_sensorid=1)
+#Wrapper.run(Configs.PISTACHIO, datetime(2022,7,26,0,0), datetime(2022,7,29,23,59), sap_sensorid=1, weather_sensorid=2)
 #exit()
 
 #TODO: add let user choose between almond and pistaccio data, then if pistaccio have them choose the weather station id (basically build Config with user input)

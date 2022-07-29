@@ -75,10 +75,10 @@ class Wrapper:
             for i,y in enumerate(y_lists):
                 plt.subplot(rows,cols,(1 +2*i,2 +2*i))
                 if nsapids > 1:
-                    plt.plot(x,[max(x,0) for x in y],linewidth=0.5, label="{}".format(id)) #the comprehension here ensures no y values are below zero
+                    plt.plot(x,y,linewidth=0.5, label="{}".format(id)) #the comprehension here ensures no y values are below zero
                     plt.legend()
                 else: 
-                    plt.plot(x,[max(x,0) for x in y]) #the comprehension here ensures no y values are below zero
+                    plt.plot(x,y) #the comprehension here ensures no y values are below zero
                 plt.title("{}\n".format(y_titles[i]))
                 plt.xticks(rotation=45)
 
@@ -92,7 +92,7 @@ class Wrapper:
             processor = Processor(data,config,sensor_type,sensor_id=id)
             processor.remove_fields(['Field','Altitude [m]'])#these might already be gone, but it depends on Config
             processor.keep_time_range(startdate,enddate)
-            processor.smoothen_data(startdate, timedelta(minutes=30))
+            processor.smoothen_data(startdate, timedelta(minutes=60))
             #analyze data
             analyzer = Analyzer(processor)
             try:
