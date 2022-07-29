@@ -11,6 +11,7 @@ class Data_Sensor_Type(Enum):
     #enum states
     WEATHER_STATION = 0
     SAP_AND_MOISTURE_SENSOR = 1
+    LUX_SENSOR = 2
 
 #TODO: add a orchard_type enum to distinguish between almond and pistachio data
 #TODO: add the naming formats to the orchard_type enum for each sensor type
@@ -34,11 +35,13 @@ class Config(NamedTuple):
 class Configs(Config, Enum):
     ALMOND = Config(False,os.path.join(ROOT_DIR, "data"),{
         Data_Sensor_Type.WEATHER_STATION:(["Date and Time","Field","Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"],None),
-        Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR:(["Date and Time","Field","Sensor ID","Value 1","Value 2"],[x for x in range(1,7)])
+        Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR:(["Date and Time","Field","Sensor ID","Value 1","Value 2"],[x for x in range(1,7)]),
+        Data_Sensor_Type.LUX_SENSOR:(["Date and Time", "lux"], [1,2])
     })
     PISTACHIO = Config(True,"http://192.168.0.116/rehsani_local",{
-        Data_Sensor_Type.WEATHER_STATION:(["Date and Time","Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"],[x for x in range(1,16)]),
-        Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR:(["Date and Time","Value 1","Value 2"],[x for x in range(1,7)])
+        Data_Sensor_Type.WEATHER_STATION:(["Date and Time","Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"],[x for x in range(0,16)]),
+        Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR:(["Date and Time","Value 1","Value 2"],[x for x in range(1,7)]),
+        Data_Sensor_Type.LUX_SENSOR:(["Date and Time", "lux"], [1,2])
     })
     
     def get_path(self,sensor_type:Data_Sensor_Type, id:int | None = None, year:int | None = None, month:int | None = None) -> str:
@@ -80,7 +83,12 @@ class Configs(Config, Enum):
                         #ensure needed optional parameters are present
                         if (isinstance(year,type(None)) or isinstance(month, type(None))):
                             raise RuntimeError("year and/or month parameter was not given")
-                        return os.path.join(self.base_path, "trew", "?id={id}&m={month}&y={year}".format(id=id,year=year,month=month))    
+                        return os.path.join(self.base_path, "trew", "?id={id}&m={month}&y={year}".format(id=id,year=year,month=month))
+                    case Data_Sensor_Type.LUX_SENSOR:
+                        #ensure needed optional parameters are present
+                        if (isinstance(year,type(None)) or isinstance(month, type(None))):
+                            raise RuntimeError("year and/or month parameter was not given")
+                        return os.path.join(self.base_path, "lux", "?id={id}&m={month}&y={year}".format(id=id,year=year,month=month))
                     case _:
                         raise RuntimeError("desired Data_Sensor_Type not yet implemented for this config")
             case _:
