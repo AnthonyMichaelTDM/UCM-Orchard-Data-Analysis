@@ -49,28 +49,32 @@ def download_from_webserver(url:str, config:Configs, sensor_type: Data_Sensor_Ty
     """
     #get file from webserver w/ requests library, raise error is this couldn't be done
     try:
-        response = requests.get(url).content.decode('utf-8')
+        response = requests.get(url).content
     except:
         raise RuntimeError("failed to connect to {}".format(url))
+    
+    if isinstance(response, type(None)):
+        raise RuntimeError("connection successful, but no data found")
+    
+    #decode and re-order response
+    response = response.decode('utf-8').split(sep=';')[:-1]
+    response.reverse()
     
     #convert response into the format returned by the Parse function ( List[Dict[str,any]])
     formatted_response: List[Dict[str,Any]] = []
     fields = config.get_field_names(sensor_type)
-    match sensor_type:
-        case Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR:
-            for row in response.split(sep=';')[:-1].reverse(): #all but last index because response ends in a semi-colon
-                formattedrow: Dict[str,Any] = process(
-                    dict(zip(
-                        fields,
-                        row.split(sep=',')
-                    )),
-                    config,
-                    sensor_type
-                )
-                formatted_response.append(formattedrow)
-        case _:
-            raise RuntimeError("Desired data source not yet implemented")
-    
+        
+    for row in response: #all but last index because response ends in a semi-colon
+        formattedrow: Dict[str,Any] = process(
+            dict(zip(
+                fields,
+                row.split(sep=',')
+            )),
+            config,
+            sensor_type
+        )
+        formatted_response.append(formattedrow)
+        
     #return formatted response
     return formatted_response
 
@@ -124,6 +128,8 @@ def process(row_data: Dict[str, str], config:Configs, sensor_type: Data_Sensor_T
                     processed_row["Humidity [RH%]"] = float(row_data.get("Humidity [RH%]"))
                     #process Pressure
                     processed_row["Pressure [hPa]"] = float(row_data.get("Pressure [hPa]"))
+                    #process Altitude
+                    processed_row["Altitude [m]"] = float(row_data.get("Altitude [m]"))
                     #process VOC
                     processed_row["VOC [kΩ]"] = float(row_data.get("VOC [kΩ]"))
                 case Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR: # if from a sap and moisture sensor

@@ -37,7 +37,7 @@ class Configs(Config, Enum):
         Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR:(["Date and Time","Field","Sensor ID","Value 1","Value 2"],[x for x in range(1,7)])
     })
     PISTACHIO = Config(True,"http://192.168.0.116/rehsani_local",{
-        Data_Sensor_Type.WEATHER_STATION:(["Date and Time","Temperature [℃]","Humidity [RH%]","Pressure [hPa]","VOC [kΩ]"],[x for x in range(1,16)]),
+        Data_Sensor_Type.WEATHER_STATION:(["Date and Time","Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"],[x for x in range(1,16)]),
         Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR:(["Date and Time","Value 1","Value 2"],[x for x in range(1,7)])
     })
     
@@ -75,7 +75,7 @@ class Configs(Config, Enum):
                         #ensure needed optional parameters are present
                         if isinstance(year,type(None)):
                             raise RuntimeError("year parameter was not given")
-                        return os.path.join(self.base_path, "weather","?id={}&y={}".format(id=id,year=year))
+                        return os.path.join(self.base_path, "weather","?id={id}&y={year}".format(id=id,year=year))
                     case Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR:
                         #ensure needed optional parameters are present
                         if (isinstance(year,type(None)) or isinstance(month, type(None))):
