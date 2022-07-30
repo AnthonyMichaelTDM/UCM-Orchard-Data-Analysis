@@ -10,7 +10,7 @@ class Wrapper:
     """acts as a layer between the user and the library-esque functionality of the data_... files, """
     
     #TODO: implement changes to definitions.py
-    def run(config: Configs, startdate:datetime, enddate:datetime, sap_sensorid:int | None = None, weather_sensorid:int | None = None):
+    def run(config: Configs, startdate:datetime, enddate:datetime, sap_sensorid:int | None = None, weather_sensorid:int | None = None, lux_sensorid:int | None = None):
         """'optional' args:
         sap_sensorid:int id for the sap and moisture sensor whose data is to be processed
         weather_sensorid:int id for the weather station whose data is to be processed"""
@@ -27,30 +27,33 @@ class Wrapper:
                 if ((not isinstance(sap_sensorid,type(None))) and sap_sensorid in config.get_sensor_ids(Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR)) and (
                     (not isinstance(weather_sensorid,type(None))) and weather_sensorid in config.get_sensor_ids(Data_Sensor_Type.WEATHER_STATION)
                 ):
-                    Wrapper.__run(config=config, startdate=startdate, enddate=enddate, sap_sensorids=[sap_sensorid], weather_sensorids=[weather_sensorid]) 
+                    Wrapper.__run(config=config, startdate=startdate, enddate=enddate, sap_sensorids=[sap_sensorid], weather_sensorids=[weather_sensorid], lux_sensorids=[lux_sensorid]) 
                 else:
                     raise RuntimeError("sensor(s) with given id(s) not found")
             case _:
                 raise RuntimeError("desired config not yet implemented")
         
-    def __run(config:Configs, startdate:datetime, enddate:datetime, sap_sensorids:List[int] | None = None, weather_sensorids:List[int] | None = None):
+    def __run(config:Configs, startdate:datetime, enddate:datetime, sap_sensorids:List[int] | None = None, weather_sensorids:List[int] | None = None, lux_sensorids:int|None=None):
         #DATA
         cols = 4 #columns of subplots
-        rows = 2 #rows of subplots 
+        rows = 3 #rows of subplots 
         nsapids = len(sap_sensorids) if not isinstance(sap_sensorids,type(None)) else 1
         nweatherids = len(weather_sensorids) if not isinstance(weather_sensorids,type(None)) else 1
+        nluxids = len(lux_sensorids) if not isinstance(lux_sensorids, type(None)) else 1
         indexes_used_for_sap = 4
         indexes_used_for_weather = 4
+        indexes_used_for_lux = 1
         
         #make sure sap/weather sensor ids is a list
         if sap_sensorids == None:
             sap_sensorids = [None]
         if weather_sensorids == None:
             weather_sensorids = [None]
+        if lux_sensorids == None:
+            lux_sensorids = [None]
         
         #SAP AND MOISTURE SENSOR(S)
-        for sap_sensorid in sap_sensorids:
-            id = sap_sensorid if not isinstance(sap_sensorid,type(None)) else None
+        for id in sap_sensorids:
             sensor_type = Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR
             #parse data
             data = Wrapper.__get_data(config=config, sensor_type=sensor_type, startdate=startdate, enddate=enddate, sensorid=id)
@@ -83,8 +86,7 @@ class Wrapper:
                 plt.xticks(rotation=45)
 
         #WEATHER STATION(S)
-        for weather_sensorid in weather_sensorids:
-            id = weather_sensorid if not isinstance(sap_sensorid,type(None)) else None
+        for id in weather_sensorids:
             sensor_type = Data_Sensor_Type.WEATHER_STATION
             #parse data
             data = Wrapper.__get_data(config=config, sensor_type=sensor_type, startdate=startdate, enddate=enddate, sensorid=id)
@@ -109,6 +111,38 @@ class Wrapper:
                 n=i+1
                 plt.subplot(rows,cols, n + indexes_used_for_sap)
                 if nweatherids > 1:
+                    plt.legend()
+                    plt.plot(x,y,linewidth=0.5, label="{}".format(id)) #the comprehension here ensures no y values are below zero
+                else: 
+                    plt.plot(x,y)
+                plt.title("{}\n".format(y_titles[i]))
+                plt.xticks(rotation=45)
+                
+        #LUX_SENSOR(S)
+        for id in lux_sensorids:
+            sensor_type = Data_Sensor_Type.LUX_SENSOR
+            #parse data
+            data = Wrapper.__get_data(config=config, sensor_type=sensor_type, startdate=startdate, enddate=enddate, sensorid=id)
+            #process data
+            processor = Processor(data,config,sensor_type,sensor_id=id)
+            processor.keep_time_range(startdate,enddate)
+            processor.smoothen_data(startdate, timedelta(minutes=60))
+            #analyze data
+            analyzer = Analyzer(processor)
+            try:
+                analyzer.analyze()
+            except RuntimeError as e:
+                print("ERROR: {}\n\tskipping...".format(e.args[0]))
+                continue
+            
+            #plot data
+            x:datetime = analyzer.data.get("Date and Time")
+            y_titles = ["Light"]
+            y_lists = [analyzer.data.get(title) for title in y_titles]
+            for i,y in enumerate(y_lists):
+                n=i+1
+                plt.subplot(rows,cols, n + indexes_used_for_sap + indexes_used_for_weather)
+                if nluxids > 1:
                     plt.legend()
                     plt.plot(x,y,linewidth=0.5, label="{}".format(id)) #the comprehension here ensures no y values are below zero
                 else: 
@@ -195,7 +229,8 @@ class Wrapper:
                         else:
                             sensor_data.extend(Parser.run(config, sensor_type, id=sensorid, year=startdate.year%100))
                         return sensor_data
-                    case Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR:
+                    #make special cases for ones that do things differently
+                    case Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR | Data_Sensor_Type.LUX_SENSOR:
                         sensor_data = []
                         if startdate.year < enddate.year:
                             #first year
