@@ -41,7 +41,7 @@ class Configs(Config, Enum):
     PISTACHIO = Config(True,"http://192.168.0.116/rehsani_local",{
         Data_Sensor_Type.WEATHER_STATION:(["Date and Time","Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"],[x for x in range(0,16)]),
         Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR:(["Date and Time","Value 1","Value 2"],[x for x in range(1,7)]),
-        Data_Sensor_Type.LUX_SENSOR:(["Date and Time", "lux"], [1,2])
+        Data_Sensor_Type.LUX_SENSOR:(["Date and Time", "Light"], [1,2])
     })
     
     def get_path(self,sensor_type:Data_Sensor_Type, id:int | None = None, year:int | None = None, month:int | None = None) -> str:
@@ -70,6 +70,7 @@ class Configs(Config, Enum):
                         if (isinstance(year,type(None)) or isinstance(month, type(None))):
                             raise RuntimeError("year and/or month parameter was not given")
                         return os.path.join(self.base_path, "Data_TREWid{id}_{year}_{month:0>2}_almond.csv".format(id=id,year=year,month=month))    
+                    #TODO: add lux once file naming scheme is known
                     case _:
                         raise RuntimeError("desired Data_Sensor_Type not yet implemented for this config")
             case Configs.PISTACHIO:

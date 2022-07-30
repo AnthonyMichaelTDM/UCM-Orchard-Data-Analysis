@@ -26,10 +26,9 @@ class Analyzer:
         if any( [len(x)==0 for x in self.data.values()] ):
             raise RuntimeError("one or more kv pairs in self.data have empty lists as values, there is likely a hole in the data for the desired timeframe")
         
-        #TODO: if different sources (ie almond orchard or pistacio orchard) need to treat the data from teh same common sensor differently, you'll need to implement that here
+        #TODO: if different sources (ie almond orchard or pistacio orchard) need to treat the data from the same common sensor differently, you'll need to implement that here
         match self.source:
-            case Data_Sensor_Type.WEATHER_STATION:
-                pass
+            #make cases for sensors that do special things here
             case Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR:
                 if not ("Value 1" in self.data and "Value 2" in self.data and "Date and Time" in self.data):
                     raise RuntimeError("Value 1, Value 2, or Date and Time missing from data")
@@ -49,7 +48,7 @@ class Analyzer:
                 
                 #a and b coefficients are the slope and y-int of a line that goes between the coords (ave wet, 100) and (ave dry, 0), ave wet and ave dry are calculated from the calibration files and are sensor specific
             case _:
-                raise RuntimeError("desired data source not implemented yet")
+                pass
     
 def calc_minT_list(deltat_list:List[float], datetime_list:List[datetime]) -> List[float]:
     """ given a list of ΔT's, and the equally sized list of datetimes those ΔT's were calculated for, 
