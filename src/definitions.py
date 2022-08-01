@@ -36,7 +36,7 @@ class Configs(Config, Enum):
     ALMOND = Config(False,os.path.join(ROOT_DIR, "data"),{
         Data_Sensor_Type.WEATHER_STATION:(["Date and Time","Field","Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"],None),
         Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR:(["Date and Time","Field","Sensor ID","Value 1","Value 2"],[x for x in range(1,7)]),
-        Data_Sensor_Type.LUX_SENSOR:(["Date and Time", "lux"], [1,2])
+        Data_Sensor_Type.LUX_SENSOR:(["Date and Time", "light"], [1,2])
     })
     PISTACHIO = Config(True,"http://192.168.0.116/rehsani_local",{
         Data_Sensor_Type.WEATHER_STATION:(["Date and Time","Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"],[x for x in range(0,16)]),
@@ -69,8 +69,13 @@ class Configs(Config, Enum):
                         #ensure other needed optional parameters are present
                         if (isinstance(year,type(None)) or isinstance(month, type(None))):
                             raise RuntimeError("year and/or month parameter was not given")
-                        return os.path.join(self.base_path, "Data_TREWid{id}_{year}_{month:0>2}_almond.csv".format(id=id,year=year,month=month))    
+                        return os.path.join(self.base_path, "Data_TREWid{id}_{year}_{month:0>2}_almond.csv".format(id=id,year=year,month=month))
                     #TODO: add lux once file naming scheme is known
+                    case Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR:
+                        #ensure other needed optional parameters are present
+                        if (isinstance(year,type(None)) or isinstance(month, type(None))):
+                            raise RuntimeError("year and/or month parameter was not given")
+                        return os.path.join(self.base_path, "Data_lux{id}_{year}_{month:0>2}_almond.csv".format(id=id,year=year,month=month))
                     case _:
                         raise RuntimeError("desired Data_Sensor_Type not yet implemented for this config")
             case Configs.PISTACHIO:

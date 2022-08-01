@@ -76,7 +76,11 @@ match config:
         maxid = max(config.get_sensor_ids(Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR))
         sap_sensorid:int = get_int("which sap and moisture sensor's data do you want to look at ({}-{}): ".format(minid,maxid),minid,maxid)
         
-        Wrapper.run(config, startdate, enddate, sap_sensorid=sap_sensorid)
+        minid = min(config.get_sensor_ids(Data_Sensor_Type.LUX_SENSOR))
+        maxid = max(config.get_sensor_ids(Data_Sensor_Type.LUX_SENSOR))
+        lux_sensorid:int = get_int("which lux sensor's data do you want to look at ({}-{}): ".format(minid,maxid),minid,maxid)
+        
+        Wrapper.run(config, startdate, enddate, sap_sensorid=sap_sensorid, lux_sensorid=lux_sensorid)
     case Configs.PISTACHIO:
         minid = min(config.get_sensor_ids(Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR))
         maxid = max(config.get_sensor_ids(Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR))

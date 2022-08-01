@@ -115,6 +115,11 @@ def process(row_data: Dict[str, str], config:Configs, sensor_type: Data_Sensor_T
                     processed_row["Value 1"] = int(row_data.get("Value 1"))
                     #process Value2
                     processed_row["Value 2"] = int(row_data.get("Value 2"))
+                case Data_Sensor_Type.LUX_SENSOR:
+                    #process Date and Time
+                    processed_row["Date and Time"] = datetime.strptime(row_data.get("Date and Time"), "%Y-%m-%d %H:%M:%S")
+                    #process Light
+                    processed_row["Light"] = float(row_data.get("Light"))
                 case _:
                     raise RuntimeError("desired data source not implemented yet")
         case Configs.PISTACHIO:

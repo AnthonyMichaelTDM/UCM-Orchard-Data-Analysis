@@ -56,7 +56,11 @@ class Wrapper:
         for id in sap_sensorids:
             sensor_type = Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR
             #parse data
-            data = Wrapper.__get_data(config=config, sensor_type=sensor_type, startdate=startdate, enddate=enddate, sensorid=id)
+            try:
+                data = Wrapper.__get_data(config=config, sensor_type=sensor_type, startdate=startdate, enddate=enddate, sensorid=id)
+            except:
+                print("could not get data for sap and moisture sensors, skipping")
+                break
             #process data
             processor = Processor(data,config,sensor_type,sensor_id=id)
             processor.remove_fields(['Field','Sensor ID'])#these might already be gone, but it depends on Config
@@ -89,7 +93,11 @@ class Wrapper:
         for id in weather_sensorids:
             sensor_type = Data_Sensor_Type.WEATHER_STATION
             #parse data
-            data = Wrapper.__get_data(config=config, sensor_type=sensor_type, startdate=startdate, enddate=enddate, sensorid=id)
+            try:
+                data = Wrapper.__get_data(config=config, sensor_type=sensor_type, startdate=startdate, enddate=enddate, sensorid=id)
+            except:
+                print("could not get data for weather, skipping")
+                break
             #process data
             processor = Processor(data,config,sensor_type,sensor_id=id)
             processor.remove_fields(['Field','Altitude [m]'])#these might already be gone, but it depends on Config
@@ -122,7 +130,11 @@ class Wrapper:
         for id in lux_sensorids:
             sensor_type = Data_Sensor_Type.LUX_SENSOR
             #parse data
-            data = Wrapper.__get_data(config=config, sensor_type=sensor_type, startdate=startdate, enddate=enddate, sensorid=id)
+            try:
+                data = Wrapper.__get_data(config=config, sensor_type=sensor_type, startdate=startdate, enddate=enddate, sensorid=id)
+            except:
+                print("could not get data for lux sensors, skipping")
+                break
             #process data
             processor = Processor(data,config,sensor_type,sensor_id=id)
             processor.keep_time_range(startdate,enddate)
@@ -190,7 +202,7 @@ class Wrapper:
                         else: 
                             sensor_data.extend(Parser.run(config, sensor_type, year=startdate.year%100, month=startdate.month))
                         return sensor_data
-                    case Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR:
+                    case Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR | Data_Sensor_Type.LUX_SENSOR:
                         sensor_data = []
                         if startdate.year < enddate.year:
                             #first year
