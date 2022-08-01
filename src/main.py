@@ -1,3 +1,7 @@
+
+"""main.py: takes user input and sets up configs to call wrapper.py"""
+__author__ = "Anthony Rubick"
+
 from datetime import datetime
 from definitions import Configs, Data_Sensor_Type
 

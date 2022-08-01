@@ -1,3 +1,6 @@
+"""data_processor.py: takes parsed data from data_parser, and processes it with a variety of methods (specify timeframe, remove fields, etc) """
+__author__ = "Anthony Rubick"
+
 #with the data, run various data analysis operations on it
 from datetime import datetime, timedelta
 from typing import Any, Dict, List

@@ -1,3 +1,6 @@
+"""data_parser.py: parses data from either CSV files or webserver (depending on config) and returns data within"""
+__author__ = "Anthony Rubick"
+
 #parses the CSV files and returns the data within
 import csv
 import os

@@ -1,11 +1,12 @@
-from datetime import datetime, timedelta
+"""data_analyzer.py: analyze data depending on sensor type and config"""
+__author__ = "Anthony Rubick"
+
+from datetime import datetime
 from typing import Any, Dict, List, Tuple
 
-from more_itertools import is_sorted
 from data_processor import Processor
 from definitions import SAP_SENSOR_COEFFICIENTS, Data_Sensor_Type
 
-#analyze and plot data from the various sources
 class Analyzer:
     def __init__(self, processor:Processor) -> None:
         """constructor"""

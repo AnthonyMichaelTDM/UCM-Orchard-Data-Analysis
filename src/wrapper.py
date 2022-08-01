@@ -1,3 +1,6 @@
+"""wrapper.py: acts as an inbetween for main.py and the more generalized library-esque data_*.py scripts"""
+__author__ = "Anthony Rubick"
+
 from datetime import datetime, timedelta
 from typing import List
 from data_analyzer import Analyzer
