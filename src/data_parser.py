@@ -143,7 +143,7 @@ def process(row_data: Dict[str, str], config:Configs, sensor_type: Data_Sensor_T
                     #process Date and Time
                     processed_row["Date and Time"] = datetime.strptime(row_data.get("Date and Time"), "%Y-%m-%d %H:%M:%S")
                     #process Light
-                    processed_row["Light"] = int(row_data.get("Light"))
+                    processed_row["Light"] = float(row_data.get("Light"))
                 case _:
                     raise RuntimeError("desired data source not implemented yet")
         case _:

@@ -36,12 +36,12 @@ class Wrapper:
     def __run(config:Configs, startdate:datetime, enddate:datetime, sap_sensorids:List[int] | None = None, weather_sensorids:List[int] | None = None, lux_sensorids:int|None=None):
         #DATA
         cols = 4 #columns of subplots
-        rows = 3 #rows of subplots 
+        rows = 2 #rows of subplots 
         nsapids = len(sap_sensorids) if not isinstance(sap_sensorids,type(None)) else 1
         nweatherids = len(weather_sensorids) if not isinstance(weather_sensorids,type(None)) else 1
         nluxids = len(lux_sensorids) if not isinstance(lux_sensorids, type(None)) else 1
         indexes_used_for_sap = 4
-        indexes_used_for_weather = 4
+        indexes_used_for_weather = 3
         indexes_used_for_lux = 1
         
         #make sure sap/weather sensor ids is a list
@@ -105,7 +105,7 @@ class Wrapper:
             
             #plot data
             x:datetime = analyzer.data.get("Date and Time")
-            y_titles = ["Temperature [℃]","Humidity [RH%]","Pressure [hPa]","VOC [kΩ]"]
+            y_titles = ["Temperature [℃]","Humidity [RH%]","Pressure [hPa]"]#,"VOC [kΩ]"]
             y_lists = [analyzer.data.get(title) for title in y_titles]
             for i,y in enumerate(y_lists):
                 n=i+1
