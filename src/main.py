@@ -90,6 +90,6 @@ match config:
         maxid = max(config.get_sensor_ids(Data_Sensor_Type.LUX_SENSOR))
         lux_sensorid:int = get_int("which lux sensor's data do you want to look at ({}-{}): ".format(minid,maxid),minid,maxid)
         
-        Wrapper.run(config, startdate, enddate, sap_sensorid=sap_sensorid, weather_sensorid=weather_sensorid, lux_sensor_id=lux_sensorid)
+        Wrapper.run(config, startdate, enddate, sap_sensorid=sap_sensorid, weather_sensorid=weather_sensorid, lux_sensorid=lux_sensorid)
     case _:
         raise RuntimeError("desired config not yet implemented")
