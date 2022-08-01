@@ -59,11 +59,7 @@ class Wrapper:
         for id in sap_sensorids:
             sensor_type = Data_Sensor_Type.SAP_AND_MOISTURE_SENSOR
             #parse data
-            try:
-                data = Wrapper.__get_data(config=config, sensor_type=sensor_type, startdate=startdate, enddate=enddate, sensorid=id)
-            except:
-                print("could not get data for sap and moisture sensors, skipping")
-                break
+            data = Wrapper.__get_data(config=config, sensor_type=sensor_type, startdate=startdate, enddate=enddate, sensorid=id)
             #process data
             processor = Processor(data,config,sensor_type,sensor_id=id)
             processor.remove_fields(['Field','Sensor ID'])#these might already be gone, but it depends on Config
@@ -96,11 +92,7 @@ class Wrapper:
         for id in weather_sensorids:
             sensor_type = Data_Sensor_Type.WEATHER_STATION
             #parse data
-            try:
-                data = Wrapper.__get_data(config=config, sensor_type=sensor_type, startdate=startdate, enddate=enddate, sensorid=id)
-            except:
-                print("could not get data for weather, skipping")
-                break
+            data = Wrapper.__get_data(config=config, sensor_type=sensor_type, startdate=startdate, enddate=enddate, sensorid=id)
             #process data
             processor = Processor(data,config,sensor_type,sensor_id=id)
             processor.remove_fields(['Field','Altitude [m]'])#these might already be gone, but it depends on Config
@@ -133,11 +125,7 @@ class Wrapper:
         for id in lux_sensorids:
             sensor_type = Data_Sensor_Type.LUX_SENSOR
             #parse data
-            try:
-                data = Wrapper.__get_data(config=config, sensor_type=sensor_type, startdate=startdate, enddate=enddate, sensorid=id)
-            except:
-                print("could not get data for lux sensors, skipping")
-                break
+            data = Wrapper.__get_data(config=config, sensor_type=sensor_type, startdate=startdate, enddate=enddate, sensorid=id)
             #process data
             processor = Processor(data,config,sensor_type,sensor_id=id)
             processor.keep_time_range(startdate,enddate)
@@ -152,7 +140,7 @@ class Wrapper:
             
             #plot data
             x:datetime = analyzer.data.get("Date and Time")
-            y_titles = ["Light"]
+            y_titles = ["Light (KLux)"]
             y_lists = [analyzer.data.get(title) for title in y_titles]
             for i,y in enumerate(y_lists):
                 n=i+1
