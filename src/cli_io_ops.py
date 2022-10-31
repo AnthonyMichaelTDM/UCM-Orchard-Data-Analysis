@@ -1,3 +1,9 @@
+
+import argparse
+import os
+from pathlib import Path
+
+
 def get_int(prompt:str, min:int, max:int) -> int:
     while True:
         value:int = int(input(prompt))
@@ -20,3 +26,10 @@ def get_char(prompt) -> str:
             return value[0]
         else:
             print("invalid input, try again")
+            
+def get_options(argv: list[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    # TODO: implement cli args here
+    ...
+    options = parser.parse_args(argv)
+    return options

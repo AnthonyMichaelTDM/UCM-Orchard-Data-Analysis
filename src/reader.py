@@ -1,12 +1,8 @@
 import abc
-import argparse
-import csv
 import os
-from typing import Any, Iterator, NamedTuple, Protocol, Type
+from typing import Any, Iterator, Protocol, Type
 
 import requests
-
-import data
 
 class RowGenerator(Protocol):
     def __init__(self, source: str, **kwargs: Any) -> None:
@@ -130,7 +126,7 @@ class WebRowRehsani(WebRow):
             
             doctests
         >>> from reader import WebRowRehsani
-        >>> response = "10,1.0,wowza;20,2.0,zoinks;".encode() #TODO: add call to bytes function to convert string to bytes 
+        >>> response = "10,1.0,wowza;20,2.0,zoinks;".encode()
         >>> fields = ["an int", "a float", "a str"]
         >>> proc_resp = WebRowRehsani.process_response(response, sample_separator=";", data_separator=",", data_fields=fields)
         >>> proc_resp
@@ -177,116 +173,22 @@ class Reader(abc.ABC):
     def __init__(
         self,
         row_generator: Type[RowGenerator],
-        sample_builder: Type[data.SampleBuilder],
-        sample_collection: Type[data.SampleList],
-        data_source: Type[data.DataSource],
-        **kwargs: Any,
+        base_path_of_files: str,
+        additional: dict[str,Any],
+        **kwargs:Any,
     ) -> None:
         self.row_generator = row_generator
-        self.sample_builder = sample_builder
-        self.sample_collection_class = sample_collection
-        self.data_source = data_source
-        self.additional_kwargs = kwargs
-        self.samples = sample_collection()
+        self.base_path_of_files = base_path_of_files
+        self.rows: list[dict[str,Any]] = []
+        self.additional = additional
+        self.additional.update(kwargs)
 
     def read(self, filename: str) -> None:
         row_gen_class = self.row_generator
-        sample_bldr_class = self.sample_builder
-        row_iter = row_gen_class(os.path.join(self.data_source.base_path(),filename), **self.additional_kwargs)
-        self.samples = self.sample_collection_class(
-            sample_bldr_class.Build(row) for row in row_iter
-        )
+        row_iter = row_gen_class(os.path.join(self.base_path_of_files,filename), **self.additional)
+        self.rows = [row for row in row_iter]
 
-class ReaderDetails(NamedTuple):
-    row_generator: Type[RowGenerator]
-    sample_builder: Type[data.SampleBuilder]
-    sample_collection: Type[data.SampleList]
-    data_source: Type[data.DataSource]
-    additional: dict[str,Any]
-    args: list[str] # for future CLI functionality
-
-class Configuration:
-    READER_CONFS: dict[str,ReaderDetails] = {
-        "almond SapAndMoisture csv" : ReaderDetails(
-            row_generator=csv.DictReader,  # type: ignore
-            sample_builder=data.SapAndMoistureSampleBuilder,
-            sample_collection=data.SampleList,
-            data_source=data.CsvDataSource,
-            additional={},
-            args = []
-        ),
-        "almond Weather csv" : ReaderDetails(
-            row_generator=csv.DictReader,  # type: ignore
-            sample_builder=data.WeatherSampleBuilder,
-            sample_collection=data.SampleList,
-            data_source=data.CsvDataSource,
-            additional={},
-            args = []
-        ),
-        "almond Lux csv" : ReaderDetails(
-            row_generator=csv.DictReader,  # type: ignore
-            sample_builder=data.LuxSampleBuilder,
-            sample_collection=data.SampleList,
-            data_source=data.CsvDataSource,
-            additional={},
-            args = []
-        ),
-        
-        "pistachio SapAndMoisture web" : ReaderDetails(
-            row_generator=WebRowRehsani,
-            sample_builder=data.SapAndMoistureSampleBuilder,
-            sample_collection=data.SampleList,
-            data_source=data.WebDataSource_rehsani_local,
-            additional={
-                "sample_separator":";",
-                "data_separator":",",
-                "data_fields":["Date and Time","Value 1","Value 2"],
-            },
-            args = []
-        ),
-        "pistachio Weather web" : ReaderDetails(
-            row_generator=WebRowRehsani,
-            sample_builder=data.WeatherSampleBuilder,
-            sample_collection=data.SampleList,
-            data_source=data.WebDataSource_rehsani_local,
-            additional={
-                "sample_separator":";",
-                "data_separator":",",
-                "data_fields":["Date and Time","Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"],
-            },
-            args = []
-        ),
-        "pistachio Lux web" : ReaderDetails(
-            row_generator=WebRowRehsani,
-            sample_builder=data.LuxSampleBuilder,
-            sample_collection=data.SampleList,
-            data_source=data.WebDataSource_rehsani_local,
-            additional={
-                "sample_separator":";",
-                "data_separator":",",
-                "data_fields":["Date and Time", "Light (KLux)"],
-            },
-            args = []
-        ),
-    }
-    #TODO: add class member to represent the analysis / parsing abstract base class, when that gets reimplemented
-    
-    
 # TODO: add unit tests for stuff in the reader module
-def build_reader(config: Type[Configuration], options: argparse.Namespace) -> Reader:
-    row_generator = config.READER_CONFS[options.format].row_generator
-    data_builder = config.READER_CONFS[options.format].sample_builder
-    data_list = config.READER_CONFS[options.format].sample_collection
-    data_source = config.READER_CONFS[options.format].data_source
-    
-    additional = config.READER_CONFS[options.format].additional # hard coded opitions
-    additional.update({ # user define opitions
-        name: getattr(options, name, None)
-        for name in config.READER_CONFS[options.format].additional
-    })
-    
-    return Reader(row_generator, data_builder, data_list, data_source,**additional)
-
 
 # Unit doctests
 
