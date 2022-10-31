@@ -1,13 +1,14 @@
-
-
+import abc
 from datetime import datetime
 
 import almond, pistachio
 import cli_io_ops
 from sensors import SensorList
 
-
-class Settings:
+#TODO: add functionality to get the file path / url to the data from specific sensors, during a specific timeframe
+    
+#FIXME: current implementation is deprecated
+class UserSettings:
     """Interacts with user to define desired behavior
     """
     def __init__(self) -> None:
@@ -95,6 +96,4 @@ class Settings:
                     print("invalid input, try again")
                     continue
             
-        
-        
         

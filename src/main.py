@@ -2,10 +2,7 @@
 """main.py: takes user input and sets up configs to call wrapper.py"""
 __author__ = "Anthony Rubick"
 
-from datetime import datetime
-from config import Settings
-
-from wrapper import Wrapper
+from config import UserSettings
 
 ## NOTE for future maintainers:
 ## the primary potential optomization is to utilize data-frames instead of dictionaries as they can access elements faster
@@ -16,8 +13,17 @@ from wrapper import Wrapper
 #Wrapper.run(Configs.PISTACHIO, datetime(2022,7,28,0,0), datetime(2022,8,1,23,59), sap_sensorid=1, weather_sensorid=2, lux_sensorid=1)
 #exit()
 
-settings:Settings = Settings();
 
 # call something to actually run the analysis
 
-# TODO: add SOLID implementations of functionality in wrapper
+
+def main():
+    # TODO: try to get all the user defined configuration from the cli, if that fails then call to a module to get the configuration from user input
+    
+    settings:UserSettings = UserSettings();
+    
+    
+    # TODO: add SOLID implementations of functionality in wrapper
+
+if __name__ == "__main__":
+    main()

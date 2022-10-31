@@ -19,8 +19,8 @@ while os.path.isfile(file_path):
             reader = csv.reader(csvfile,dialect=dialect)
             
             # return data
-            reader = [x for x in reader] #convert reader to a list
-            data = [ [int(data) for data in row] for row in reader[1:]] #convert data to int, also skip first row
+            reader_list: list[list[str]] = [x for x in reader] #convert reader to a list
+            data = [ [int(data) for data in row] for row in reader_list[1:]] #convert data to int, also skip first row
 
     #calculate coefficients
     ave_wet = average( [row[0] for row in data] )

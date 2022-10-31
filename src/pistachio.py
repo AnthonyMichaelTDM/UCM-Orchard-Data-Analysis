@@ -1,9 +1,9 @@
+from dataclasses import dataclass
 import os
-from .data import DataSource
-from .sensors import SapAndMoistureSensor,WeatherSensor,LuxSensor
+from data import DataSource
+from sensors import SapAndMoistureSensor,WeatherSensor,LuxSensor
 
-class PistachioDataSource(DataSource):
-    base_path: str = "http://192.168.0.116/rehsani_local"
+# FIXME: this module is deprecated
 
 class PistachioSapAndMoistureSensor(SapAndMoistureSensor):
     minID:int = 1

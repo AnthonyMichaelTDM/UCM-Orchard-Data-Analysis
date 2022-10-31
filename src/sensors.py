@@ -1,8 +1,13 @@
 import abc
 from datetime import datetime
-from typing import Iterable, Iterator, Optional, SupportsIndex, Union, overload
+from typing import Iterable, Iterator, Optional, SupportsIndex, Type, Union, overload
+
+from data import Sample
+
+# FIXME: refactor for SOLID
 
 class Sensor(abc.ABC):
+    sample_class: Type[Sample]
     minID: int | None = None
     maxID: int | None = None
     
