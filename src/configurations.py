@@ -1,29 +1,11 @@
 import csv
-from datetime import datetime, timedelta
 import os
-from typing import Any, Callable, Iterable, Iterator, NamedTuple, Optional, SupportsIndex, Type, Union, overload
-from contracts import FilenameGeneratorContract
+from typing import Iterable, Iterator, NamedTuple, Optional, SupportsIndex, Union, overload
+from details import ReaderDetails, SampleDetails, SensorDetails
 
-import sample
-from reader import RowGenerator, WebRowRehsani
+from reader import WebRowRehsani
 
 
-class SensorDetails(NamedTuple):
-    valid_ids: list[int] | None
-    filename_generator: FilenameGeneratorContract
-    smoothening_interval: timedelta|None = timedelta(minutes=60)
-
-class ReaderDetails(NamedTuple):
-    row_generator: Type[RowGenerator]
-    data_source: sample.DataSource
-    additional: dict[str,Any] = {}
-    args: list[str] = []# for future CLI functionality
-
-class SampleDetails(NamedTuple):
-    important_fields: list[str]
-    field_types: list[Any]
-    timestamp_fieldname:str = "Date and Time"
-    timestamp_format:str = "%Y-%m-%d %H:%M:%S"
     
 class ConfigDetails(NamedTuple):
     title:str
@@ -67,7 +49,7 @@ class Configurations:
                 ),
                 READER_CONF=ReaderDetails(
                     row_generator=csv.DictReader,  # type: ignore
-                    data_source=sample.DataSource(base_path=os.path.join(os.path.realpath(os.path.join(os.path.dirname(__file__), '..')), "data")),
+                    data_source=os.path.join(os.path.realpath(os.path.join(os.path.dirname(__file__), '..')), "data"),
                 ),
                 SAMPLE_CONF=SampleDetails(
                     important_fields=["Value 1","Value 2"],
@@ -82,7 +64,7 @@ class Configurations:
                 ),
                 READER_CONF=ReaderDetails(
                     row_generator=csv.DictReader,  # type: ignore
-                    data_source=sample.DataSource(base_path=os.path.join(os.path.realpath(os.path.join(os.path.dirname(__file__), '..')), "data")),
+                    data_source=os.path.join(os.path.realpath(os.path.join(os.path.dirname(__file__), '..')), "data"),
                 ),
                 SAMPLE_CONF=SampleDetails(
                     important_fields= ["Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"],
@@ -97,7 +79,7 @@ class Configurations:
                 ),
                 READER_CONF=ReaderDetails(
                     row_generator=csv.DictReader,  # type: ignore
-                    data_source=sample.DataSource(base_path=os.path.join(os.path.realpath(os.path.join(os.path.dirname(__file__), '..')), "data")),
+                    data_source=os.path.join(os.path.realpath(os.path.join(os.path.dirname(__file__), '..')), "data"),
                 ),
                 SAMPLE_CONF=SampleDetails(
                     important_fields= ["Light (KLux)"],
@@ -114,7 +96,7 @@ class Configurations:
                 ),
                 READER_CONF=ReaderDetails(
                     row_generator=WebRowRehsani,
-                    data_source=sample.DataSource(base_path="http://192.168.0.116/rehsani_local")
+                    data_source="http://192.168.0.116/rehsani_local"
                 ),
                 SAMPLE_CONF=SampleDetails(
                     important_fields=["Value 1","Value 2"],
@@ -129,7 +111,7 @@ class Configurations:
                 ),
                 READER_CONF=ReaderDetails(
                     row_generator=WebRowRehsani,
-                    data_source=sample.DataSource(base_path="http://192.168.0.116/rehsani_local")
+                    data_source="http://192.168.0.116/rehsani_local"
                 ),
                 SAMPLE_CONF=SampleDetails(
                     important_fields=["Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"],
@@ -144,7 +126,7 @@ class Configurations:
                 ),
                 READER_CONF=ReaderDetails(
                     row_generator=WebRowRehsani,
-                    data_source=sample.DataSource(base_path="http://192.168.0.116/rehsani_local")
+                    data_source="http://192.168.0.116/rehsani_local"
                 ),
                 SAMPLE_CONF=SampleDetails(
                     important_fields=["Value 1","Value 2"],

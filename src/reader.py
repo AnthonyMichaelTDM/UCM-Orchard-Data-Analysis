@@ -1,4 +1,5 @@
 import abc
+import argparse
 import os
 from typing import Any, Iterator, Protocol, Type
 
@@ -192,6 +193,24 @@ class Reader(abc.ABC):
         row_gen_class = self.row_generator
         row_iter = row_gen_class(os.path.join(self.base_path,filename), **self.additional)
         self.rows.extend([row for row in row_iter])
+
+
+# TODO: add unit tests 
+def ReaderFactory( #can't just have ReaderDetails as a parameter because that'll cause circular dependency
+    row_generator: Type[RowGenerator], 
+    data_source: str,
+    options: argparse.Namespace,
+    additional: dict[str,Any] = {},
+    args: list[str] = []
+) -> Reader:
+    # settings with names hardcoded, but values given by user
+    # aka: settings that aren't the same all the time, but also aren't needed by every reader
+    other: dict[str, Any | None] = { # user define opitions
+        name: getattr(options, name, None)
+        for name in args
+    }
+    return Reader(row_generator, data_source, additional, **other)
+
 
 # TODO: add unit tests for stuff in the reader module
 

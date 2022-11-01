@@ -1,9 +1,8 @@
 
 from datetime import datetime
 from configurations import SampleDetails
-from contracts import FilenameGeneratorContract, SampleFactoryContract
-from sample import SampleList
-from factories import SampleFactory
+from details import FilenameGeneratorContract
+from sample import SampleList, SampleFactoryContract, SampleFactory
 from reader import Reader
 
 
