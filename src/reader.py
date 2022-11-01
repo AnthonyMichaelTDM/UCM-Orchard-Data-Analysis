@@ -173,20 +173,25 @@ class Reader(abc.ABC):
     def __init__(
         self,
         row_generator: Type[RowGenerator],
-        base_path_of_files: str,
+        base_path: str,
         additional: dict[str,Any],
         **kwargs:Any,
     ) -> None:
         self.row_generator = row_generator
-        self.base_path_of_files = base_path_of_files
+        self.base_path = base_path
         self.rows: list[dict[str,Any]] = []
         self.additional = additional
         self.additional.update(kwargs)
 
-    def read(self, filename: str) -> None:
+    def read(self, filename:str) -> None:
+        """reads the data from 'filename', and appends its 'rows' list
+
+        Args:
+            filename (str): file name (at `self.base_path/filename`) to read from
+        """
         row_gen_class = self.row_generator
-        row_iter = row_gen_class(os.path.join(self.base_path_of_files,filename), **self.additional)
-        self.rows = [row for row in row_iter]
+        row_iter = row_gen_class(os.path.join(self.base_path,filename), **self.additional)
+        self.rows.extend([row for row in row_iter])
 
 # TODO: add unit tests for stuff in the reader module
 

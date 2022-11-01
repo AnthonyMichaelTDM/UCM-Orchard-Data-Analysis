@@ -1,10 +1,17 @@
 import csv
+from datetime import datetime, timedelta
 import os
-from typing import Any, Iterable, Iterator, NamedTuple, Optional, SupportsIndex, Type, Union, overload
+from typing import Any, Callable, Iterable, Iterator, NamedTuple, Optional, SupportsIndex, Type, Union, overload
+from contracts import FilenameGeneratorContract
 
 import sample
 from reader import RowGenerator, WebRowRehsani
 
+
+class SensorDetails(NamedTuple):
+    valid_ids: list[int] | None
+    filename_generator: FilenameGeneratorContract
+    smoothening_interval: timedelta|None = timedelta(minutes=60)
 
 class ReaderDetails(NamedTuple):
     row_generator: Type[RowGenerator]
@@ -20,6 +27,7 @@ class SampleDetails(NamedTuple):
     
 class ConfigDetails(NamedTuple):
     title:str
+    SENSOR_CONF: SensorDetails
     READER_CONF: ReaderDetails
     SAMPLE_CONF: SampleDetails
     #TODO: additional commands and processing to run
@@ -53,6 +61,10 @@ class Configurations:
         "almond": ConfigList([
             ConfigDetails(
                 title = "Almond sap and moisture",
+                SENSOR_CONF=SensorDetails(
+                    valid_ids=list(range(1,7)),
+                    filename_generator=lambda date, id: "Data_TREWid{id}_{year}_{month:0>2}_almond.csv".format(id=id,year=date.year%100,month=date.month)
+                ),
                 READER_CONF=ReaderDetails(
                     row_generator=csv.DictReader,  # type: ignore
                     data_source=sample.DataSource(base_path=os.path.join(os.path.realpath(os.path.join(os.path.dirname(__file__), '..')), "data")),
@@ -64,6 +76,10 @@ class Configurations:
             ),
             ConfigDetails(
                 title = "Almond weather",
+                SENSOR_CONF=SensorDetails(
+                    valid_ids=None,
+                    filename_generator=lambda date, _id: "Data_weather_{year}_{month:0>2}_almond.csv".format(year=date.year%100,month=date.month)
+                ),
                 READER_CONF=ReaderDetails(
                     row_generator=csv.DictReader,  # type: ignore
                     data_source=sample.DataSource(base_path=os.path.join(os.path.realpath(os.path.join(os.path.dirname(__file__), '..')), "data")),
@@ -75,6 +91,10 @@ class Configurations:
             ),
             ConfigDetails(
                 title = "Almond lux",
+                SENSOR_CONF=SensorDetails(
+                    valid_ids=[1,2],
+                    filename_generator=lambda date, id: "Data_lux_{year}_{month:0>2}_almond.csv".format(year=date.year%100,month=date.month)
+                ),
                 READER_CONF=ReaderDetails(
                     row_generator=csv.DictReader,  # type: ignore
                     data_source=sample.DataSource(base_path=os.path.join(os.path.realpath(os.path.join(os.path.dirname(__file__), '..')), "data")),
@@ -88,6 +108,10 @@ class Configurations:
         "pistachio": ConfigList([
             ConfigDetails(
                 title = "Pistachio sap and moisture",
+                SENSOR_CONF=SensorDetails(
+                    valid_ids=list(range(1,7)),
+                    filename_generator=lambda date, id: "trew/?id={id}&m={month}&y={year}".format(id=id,year=date.year,month=date.month)
+                ),
                 READER_CONF=ReaderDetails(
                     row_generator=WebRowRehsani,
                     data_source=sample.DataSource(base_path="http://192.168.0.116/rehsani_local")
@@ -99,6 +123,10 @@ class Configurations:
             ),
             ConfigDetails(
                 title = "Pistachio weather",
+                SENSOR_CONF=SensorDetails(
+                    valid_ids=list(range(0,16)),
+                    filename_generator=lambda date, id: "weather/id={id}&y={year}".format(id=id,year=date.year)
+                ),
                 READER_CONF=ReaderDetails(
                     row_generator=WebRowRehsani,
                     data_source=sample.DataSource(base_path="http://192.168.0.116/rehsani_local")
@@ -110,6 +138,10 @@ class Configurations:
             ),
             ConfigDetails(
                 title="Pistachio lux",
+                SENSOR_CONF=SensorDetails(
+                    valid_ids=[1,2],
+                    filename_generator=lambda date, id: "lux/?id={id}&m={month}&y={year}".format(id=id,year=date.year,month=date.month)
+                ),
                 READER_CONF=ReaderDetails(
                     row_generator=WebRowRehsani,
                     data_source=sample.DataSource(base_path="http://192.168.0.116/rehsani_local")

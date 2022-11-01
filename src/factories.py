@@ -5,9 +5,6 @@ from configurations import ReaderDetails, SampleDetails
 from sample import Sample
 from reader import Reader
 
-
-SampleFactoryContract = Callable[[dict[str, Any], SampleDetails], Sample]
-
 def SampleFactory(row: dict[str,Any], config: SampleDetails) -> Sample:
     """returns an instance of Sample, with data parsed from row
 
