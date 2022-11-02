@@ -23,7 +23,7 @@ class RowGenerator(Protocol):
         """
         ...
         
-class WebRow(abc.ABC):
+class WebRow(RowGenerator,abc.ABC):
     """follows RowGenerator protocol"""
     @staticmethod
     @abc.abstractmethod
@@ -196,7 +196,7 @@ class Reader(abc.ABC):
 
 
 # TODO: add unit tests 
-def ReaderFactory( #can't just have ReaderDetails as a parameter because that'll cause circular dependency
+def ReaderBuilder( #can't just have ReaderDetails as a parameter because that'll cause circular dependency
     row_generator: Type[RowGenerator], 
     data_source: str,
     options: argparse.Namespace,

@@ -2,17 +2,17 @@
 from datetime import datetime
 from configurations import SampleDetails
 from details import FilenameGeneratorContract
-from sample import SampleList, SampleFactoryContract, SampleFactory
+from sample import SampleList, SampleBuilderContract, SampleBuilder
 from reader import Reader
 
 
 def process_reader_into_samplelist(
     reader:Reader,
     sampleconf: SampleDetails,
-    samplefactory:SampleFactoryContract = SampleFactory,
+    builder:SampleBuilderContract = SampleBuilder,
 ) -> SampleList:
     return SampleList([
-        samplefactory(row,sampleconf)
+        builder(row,sampleconf)
         for row in reader.rows[1:]
     ])
 

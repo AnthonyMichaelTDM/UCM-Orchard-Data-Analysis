@@ -7,8 +7,8 @@ from configurations import ConfigDetails, Configurations
 from datetime import date
 import sys
 
-from reader import Reader, ReaderFactory
-from sample import SampleFactory, SampleList
+from reader import Reader, ReaderBuilder
+from sample import SampleBuilder, SampleList
 
 
 def get_int(prompt:str, min:int, max:int) -> int:
@@ -73,7 +73,7 @@ def get_options(argv: list[str]) -> argparse.Namespace:
 
 
 def run(config: ConfigDetails, options: argparse.Namespace, id: int|None):
-    reader: Reader = ReaderFactory(
+    reader: Reader = ReaderBuilder(
         row_generator=config.READER_CONF.row_generator,
         data_source=config.READER_CONF.data_source,
         additional=config.READER_CONF.additional,
@@ -88,7 +88,7 @@ def run(config: ConfigDetails, options: argparse.Namespace, id: int|None):
     ):
         reader.read(filename)
     
-    samples:SampleList = process_reader_into_samplelist(reader, config.SAMPLE_CONF, SampleFactory)
+    samples:SampleList = process_reader_into_samplelist(reader, config.SAMPLE_CONF, SampleBuilder)
     
     samples.trim_to_timerange(options.startdate,options.enddate)
     
