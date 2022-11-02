@@ -3,7 +3,7 @@ import os
 from typing import Iterable, Iterator, NamedTuple, Optional, SupportsIndex, Union, overload
 from details import ReaderDetails, SampleDetails, SensorDetails
 
-from reader import WebRowRehsani
+from rowgenerator import WebRowRehsani
 
 
     

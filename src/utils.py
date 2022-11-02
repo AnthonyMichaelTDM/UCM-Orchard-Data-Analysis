@@ -5,7 +5,7 @@ from details import FilenameGeneratorContract
 from sample import SampleList, SampleBuilderContract, SampleBuilder
 from reader import Reader
 
-
+#TODO: add unit tests
 def process_reader_into_samplelist(
     reader:Reader,
     sampleconf: SampleDetails,

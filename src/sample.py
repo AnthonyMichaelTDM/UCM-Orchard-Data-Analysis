@@ -13,8 +13,6 @@ class Sample():
     datapoints: dict[str, Any]
     ...
 
-SampleBuilderContract = Callable[[dict[str, Any], SampleDetails], Sample]
-
 class SampleList(list[Sample]):
     def __init__(
         self,
@@ -119,7 +117,8 @@ class SampleList(list[Sample]):
             )
         
         return results
-            
+           
+SampleBuilderContract = Callable[[dict[str, Any], SampleDetails], Sample] 
 
 def SampleBuilder(row: dict[str,Any], config: SampleDetails) -> Sample:
     """returns an instance of Sample, with data parsed from row

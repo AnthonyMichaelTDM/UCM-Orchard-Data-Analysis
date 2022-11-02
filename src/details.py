@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Any, Callable, NamedTuple, Optional, Type
 
-from reader import RowGenerator
+from rowgenerator import RowGenerator
 
 FilenameGeneratorContract = Callable[[datetime, Optional[int]], str]
 class SensorDetails(NamedTuple):
@@ -20,3 +20,4 @@ class SampleDetails(NamedTuple):
     field_types: list[Any]
     timestamp_fieldname:str = "Date and Time"
     timestamp_format:str = "%Y-%m-%d %H:%M:%S"
+  

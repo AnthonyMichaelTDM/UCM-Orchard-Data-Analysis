@@ -74,10 +74,7 @@ def get_options(argv: list[str]) -> argparse.Namespace:
 
 def run(config: ConfigDetails, options: argparse.Namespace, id: int|None):
     reader: Reader = ReaderBuilder(
-        row_generator=config.READER_CONF.row_generator,
-        data_source=config.READER_CONF.data_source,
-        additional=config.READER_CONF.additional,
-        args=config.READER_CONF.args,
+        config=config.READER_CONF,
         options=options
     )
     for filename in get_filenames_for_timerange(
