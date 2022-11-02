@@ -1,7 +1,8 @@
+from analysis import AnalyzeSapFlow
 import csv
 import os
 from typing import Iterable, Iterator, NamedTuple, Optional, SupportsIndex, Union, overload
-from details import ReaderDetails, SampleDetails, SensorDetails
+from details import PlotterDetails, ReaderDetails, SampleDetails, SensorDetails
 
 from rowgenerator import WebRowRehsani
 
@@ -12,6 +13,7 @@ class ConfigDetails(NamedTuple):
     SENSOR_CONF: SensorDetails
     READER_CONF: ReaderDetails
     SAMPLE_CONF: SampleDetails
+    PLOTTER_CONF: list[PlotterDetails]
     #TODO: additional commands and processing to run
 
 class ConfigList(list[ConfigDetails]):
@@ -55,6 +57,13 @@ class Configurations:
                     important_fields=["Value 1","Value 2"],
                     field_types     =[int,      int],
                 ),
+                PLOTTER_CONF=[PlotterDetails(
+                    figure_id=1,
+                    y_list_gen=lambda samples: AnalyzeSapFlow.run(samples),
+                    y_lable="Sap Flow",
+                    x_list_gen=lambda samples: [sample.timestamp for sample in samples],
+                    x_label="Time",
+                )]
             ),
             ConfigDetails(
                 title = "Almond weather",
@@ -69,7 +78,15 @@ class Configurations:
                 SAMPLE_CONF=SampleDetails(
                     important_fields= ["Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"],
                     field_types=      [float,               float,          float,              float,      float],
-                )
+                ),
+                PLOTTER_CONF=[
+                    PlotterDetails(
+                        figure_id=2,
+                        y_list_gen=lambda samples: [sample.datapoints[label] for sample in samples],
+                        y_lable=label
+                    )
+                    for label in ["Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"]
+                ]
             ),
             ConfigDetails(
                 title = "Almond lux",
@@ -84,7 +101,17 @@ class Configurations:
                 SAMPLE_CONF=SampleDetails(
                     important_fields= ["Light (KLux)"],
                     field_types=      [float]
-                )
+                ),
+                PLOTTER_CONF=[
+                    PlotterDetails(
+                        figure_id=3,
+                        y_list_gen=lambda samples: [
+                            sample.datapoints["Light (KLux)"] 
+                            for sample in samples
+                        ],
+                        y_lable="Light (KLux)",
+                    )
+                ]
             )
         ]),
         "pistachio": ConfigList([
@@ -101,7 +128,14 @@ class Configurations:
                 SAMPLE_CONF=SampleDetails(
                     important_fields=["Value 1","Value 2"],
                     field_types=[int,int]
-                )
+                ),
+                PLOTTER_CONF=[PlotterDetails(
+                    figure_id=1,
+                    y_list_gen=lambda samples: AnalyzeSapFlow.run(samples),
+                    y_lable="Sap Flow",
+                    x_list_gen=lambda samples: [sample.timestamp for sample in samples],
+                    x_label="Time",
+                )]
             ),
             ConfigDetails(
                 title = "Pistachio weather",
@@ -116,7 +150,15 @@ class Configurations:
                 SAMPLE_CONF=SampleDetails(
                     important_fields=["Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"],
                     field_types=[float,float,float,float,float]
-                )
+                ),
+                PLOTTER_CONF=[
+                    PlotterDetails(
+                        figure_id=2,
+                        y_list_gen=lambda samples: [sample.datapoints[label] for sample in samples],
+                        y_lable=label
+                    )
+                    for label in ["Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"]
+                ]
             ),
             ConfigDetails(
                 title="Pistachio lux",
@@ -131,7 +173,17 @@ class Configurations:
                 SAMPLE_CONF=SampleDetails(
                     important_fields=["Value 1","Value 2"],
                     field_types=[int,int]
-                )
+                ),
+                PLOTTER_CONF=[
+                    PlotterDetails(
+                        figure_id=3,
+                        y_list_gen=lambda samples: [
+                            sample.datapoints["Light (KLux)"] 
+                            for sample in samples
+                        ],
+                        y_lable="Light (KLux)",
+                    )
+                ]
             )
         ])
     }
