@@ -2,7 +2,7 @@
 __author__ = "Anthony Rubick"
 
 import argparse
-from commands import get_filenames_for_timerange, process_reader_into_samplelist
+from utils import get_filenames_for_timerange, process_reader_into_samplelist
 from configurations import ConfigDetails, Configurations
 from datetime import date
 import sys
