@@ -125,7 +125,6 @@ class WebRowRehsani(WebRow):
             list[dict[str,Any]]: the processed response
             
             doctests
-        >>> from reader import WebRowRehsani
         >>> response = "10,1.0,wowza;20,2.0,zoinks;".encode()
         >>> fields = ["an int", "a float", "a str"]
         >>> proc_resp = WebRowRehsani.process_response(response, sample_separator=";", data_separator=",", data_fields=fields)

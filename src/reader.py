@@ -1,7 +1,7 @@
+import abc
 import argparse
 import os
 from typing import Any, Type
-from details import ReaderDetails
 
 from rowgenerator import RowGenerator
 
@@ -29,19 +29,28 @@ class Reader():
         row_iter = row_gen_class(os.path.join(self.base_path,filename), **self.additional)
         self.rows.extend([row for row in row_iter])
 
-
-# TODO: add unit tests 
-def ReaderBuilder( #can't just have ReaderDetails as a parameter because that'll cause circular dependency
-    config: ReaderDetails,
-    options: argparse.Namespace,
-) -> Reader:
-    # settings with names hardcoded, but values given by user
-    # aka: settings that aren't the same all the time, but also aren't needed by every reader
-    other: dict[str, Any | None] = { # user define opitions
-        name: getattr(options, name, None)
-        for name in config.args
-    }
-    return Reader(config.row_generator, config.data_source, config.additional, **other)
+class ReaderBuilderBase(abc.ABC):
+    from details import ReaderDetails
+    @staticmethod
+    @abc.abstractmethod
+    def build(config:ReaderDetails, options: argparse.Namespace) -> Reader:
+        ...
+        
+class ReaderBuilder(ReaderBuilderBase):
+    from details import ReaderDetails
+    @staticmethod
+    # TODO: add unit tests 
+    def ReaderBuilder( #can't just have ReaderDetails as a parameter because that'll cause circular dependency
+        config: ReaderDetails,
+        options: argparse.Namespace,
+    ) -> Reader:
+        # settings with names hardcoded, but values given by user
+        # aka: settings that aren't the same all the time, but also aren't needed by every reader
+        other: dict[str, Any | None] = { # user define opitions
+            name: getattr(options, name, None)
+            for name in config.args
+        }
+        return Reader(config.row_generator, config.data_source, config.additional, **other)
 
 
 # TODO: add unit tests for stuff in the reader module

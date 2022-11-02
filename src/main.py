@@ -73,7 +73,7 @@ def get_options(argv: list[str]) -> argparse.Namespace:
 
 
 def run(config: ConfigDetails, options: argparse.Namespace, id: int|None):
-    reader: Reader = ReaderBuilder(
+    reader: Reader = ReaderBuilder.build(
         config=config.READER_CONF,
         options=options
     )

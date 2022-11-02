@@ -1,18 +1,19 @@
 
 from datetime import datetime
+from typing import Type
 from configurations import SampleDetails
 from details import FilenameGeneratorContract
-from sample import SampleList, SampleBuilderContract, SampleBuilder
+from sample import SampleBuilderBase, SampleList, SampleBuilder
 from reader import Reader
 
 #TODO: add unit tests
 def process_reader_into_samplelist(
     reader:Reader,
     sampleconf: SampleDetails,
-    builder:SampleBuilderContract = SampleBuilder,
+    builder:Type[SampleBuilderBase] = SampleBuilder,
 ) -> SampleList:
     return SampleList([
-        builder(row,sampleconf)
+        builder.build(row,sampleconf)
         for row in reader.rows[1:]
     ])
 
