@@ -22,17 +22,17 @@ class SampleDetails(NamedTuple):
     timestamp_fieldname:str = "Date and Time"
     timestamp_format:str = "%Y-%m-%d %H:%M:%S"
 
-x_list_generator_contract = Callable[[SampleList],list[Any]]
-y_list_generator_contract = Callable[[SampleList],list[Any]]
 
+plotter_list_generator_contract = Callable[[SampleList,int],list[Any]]
 # for some reason python is throwing an error when I put this lambda in the PlotterDetails class 
-__x_gen__ = lambda samples: [
+__x_gen__ = lambda samples, _id: [
         sample.timestamp 
         for sample in samples
 ]
 class PlotterDetails(NamedTuple):
     figure_id:int
-    y_list_gen: y_list_generator_contract
+    y_list_gen: plotter_list_generator_contract
     y_lable:str
-    x_list_gen: x_list_generator_contract = __x_gen__
+    x_list_gen: plotter_list_generator_contract = __x_gen__
     x_label: str = "Time"
+    additional: dict[str,Any] = {}

@@ -57,14 +57,33 @@ class Configurations:
                     important_fields=["Value 1","Value 2"],
                     field_types     =[int,      int],
                 ),
-                PLOTTER_CONF=[PlotterDetails(
-                    figure_id=1,
-                    y_list_gen=lambda samples: AnalyzeSapFlow.run(samples),
-                    y_lable="Sap Flow",
-                    x_list_gen=lambda samples: [sample.timestamp for sample in samples],
-                    x_label="Time",
-                )]
-            ),
+                PLOTTER_CONF=[
+                    PlotterDetails(
+                        figure_id=1,
+                        y_list_gen=lambda samples, id: AnalyzeSapFlow.run_relativemoisture(
+                            [sample.datapoints["Value 2"] for sample in samples],
+                            sensor_id=id,
+                            sensor_coefficients=[
+                                {"a": -0.0442015591095395, "b": 191.7556055613598}, #Sensor 1
+                                {"a": -0.04861278384829307, "b": 202.27735563973982}, #Sensor 2
+                                {"a": -0.05762850897914471, "b": 215.35202712174151}, #Sensor 3
+                                {"a": -0.05445248031047814, "b": 212.60475914677914}, #Sensor 4
+                                {"a": -0.05701605695441798, "b": 211.74325309992707}, #Sensor 5
+                                {"a": -0.053728569077514346, "b": 212.98440419373264} #Sensor 6
+                            ]
+                        ),
+                        y_lable="Relative Moisture %",
+                    ),
+                    PlotterDetails(
+                        figure_id=1,
+                        y_list_gen=lambda samples, _id: AnalyzeSapFlow.run_sapflux(
+                            [sample.datapoints["Value 1"] for sample in samples],
+                            [sample.timestamp for sample in samples]
+                        ),
+                        y_lable="Sap Flux Density",
+                    ),
+                ]
+            ),         
             ConfigDetails(
                 title = "Almond weather",
                 SENSOR_CONF=SensorDetails(
@@ -82,7 +101,7 @@ class Configurations:
                 PLOTTER_CONF=[
                     PlotterDetails(
                         figure_id=2,
-                        y_list_gen=lambda samples: [sample.datapoints[label] for sample in samples],
+                        y_list_gen=lambda samples, _id: [sample.datapoints[label] for sample in samples],
                         y_lable=label
                     )
                     for label in ["Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"]
@@ -105,7 +124,7 @@ class Configurations:
                 PLOTTER_CONF=[
                     PlotterDetails(
                         figure_id=3,
-                        y_list_gen=lambda samples: [
+                        y_list_gen=lambda samples, _id: [
                             sample.datapoints["Light (KLux)"] 
                             for sample in samples
                         ],
@@ -129,13 +148,28 @@ class Configurations:
                     important_fields=["Value 1","Value 2"],
                     field_types=[int,int]
                 ),
-                PLOTTER_CONF=[PlotterDetails(
-                    figure_id=1,
-                    y_list_gen=lambda samples: AnalyzeSapFlow.run(samples),
-                    y_lable="Sap Flow",
-                    x_list_gen=lambda samples: [sample.timestamp for sample in samples],
-                    x_label="Time",
-                )]
+                PLOTTER_CONF=[
+                    PlotterDetails(
+                        figure_id=1,
+                        y_list_gen=lambda samples, id: AnalyzeSapFlow.run_relativemoisture(
+                            [sample.datapoints["Value 2"] for sample in samples],
+                            sensor_id=id,
+                            sensor_coefficients=[ #TODO: calibrate the sensors (./other_scripts/calc_calibration_coefficients.py) with calibration data, for now just using averages from the almond sensors calibrations
+                                {"a":-0.05260665971323129, "b":207.7862341272133}
+                                for _ in range(1,7)
+                            ]
+                        ),
+                        y_lable="Sap Flow",
+                    ),
+                    PlotterDetails(
+                        figure_id=1,
+                        y_list_gen=lambda samples, _id: AnalyzeSapFlow.run_sapflux(
+                            [sample.datapoints["Value 1"] for sample in samples],
+                            [sample.timestamp for sample in samples]
+                        ),
+                        y_lable="Sap Flux Density",
+                    ),
+                ]
             ),
             ConfigDetails(
                 title = "Pistachio weather",
@@ -154,7 +188,7 @@ class Configurations:
                 PLOTTER_CONF=[
                     PlotterDetails(
                         figure_id=2,
-                        y_list_gen=lambda samples: [sample.datapoints[label] for sample in samples],
+                        y_list_gen=lambda samples, _id: [sample.datapoints[label] for sample in samples],
                         y_lable=label
                     )
                     for label in ["Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"]
@@ -177,7 +211,7 @@ class Configurations:
                 PLOTTER_CONF=[
                     PlotterDetails(
                         figure_id=3,
-                        y_list_gen=lambda samples: [
+                        y_list_gen=lambda samples, _id: [
                             sample.datapoints["Light (KLux)"] 
                             for sample in samples
                         ],
