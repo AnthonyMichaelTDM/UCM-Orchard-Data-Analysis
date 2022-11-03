@@ -173,7 +173,7 @@ class WebRowRehsani(WebRow):
         split_response: list[str] = response.decode('utf-8').split(sep=sample_separator)
         split_rows: list[list[str]]  = [
             row.split(sep=data_separator)
-            for row in split_response # reversed so we can add a row to the start with field headers (but after checking length)
+            for row in split_response
         ]
         
         #ensure that len(data_fields) is the same as the number of values in each sample
