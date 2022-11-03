@@ -1,9 +1,10 @@
 import abc
 import argparse
 import os
-from typing import Any, Type
+from typing import Any, NamedTuple, Type
 
 from rowgenerator import RowGenerator
+
 
 class Reader():
     def __init__(
@@ -19,6 +20,7 @@ class Reader():
         self.additional = additional
         self.additional.update(kwargs)
 
+
     def read(self, filename:str) -> None:
         """reads the data from 'filename', and appends its 'rows' list
 
@@ -29,15 +31,21 @@ class Reader():
         row_iter = row_gen_class(os.path.join(self.base_path,filename), **self.additional)
         self.rows.extend([row for row in row_iter])
 
+class ReaderDetails(NamedTuple):
+    row_generator: Type[RowGenerator]
+    data_source: str
+    additional: dict[str,Any] = {}
+    args: list[str] = []# for future CLI functionality
+
+
 class ReaderBuilderBase(abc.ABC):
-    from details import ReaderDetails
     @staticmethod
     @abc.abstractmethod
     def build(config:ReaderDetails, options: argparse.Namespace) -> Reader:
         ...
         
+        
 class ReaderBuilder(ReaderBuilderBase):
-    from details import ReaderDetails
     @staticmethod
     # TODO: add unit tests 
     def ReaderBuilder( #can't just have ReaderDetails as a parameter because that'll cause circular dependency

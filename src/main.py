@@ -2,6 +2,9 @@
 __author__ = "Anthony Rubick"
 
 import argparse
+
+from matplotlib import pyplot as plt
+from plotter import PlotterBuilder
 from utils import get_filenames_for_timerange, process_reader_into_samplelist
 from configurations import ConfigDetails, Configurations
 from datetime import date
@@ -92,9 +95,14 @@ def run(config: ConfigDetails, options: argparse.Namespace, id: int|None):
     if config.SENSOR_CONF.smoothening_interval:
         samples = samples.get_smoothened_data(options.startdate, config.SENSOR_CONF.smoothening_interval)
         
-    # run analysis
-    
     # make plot
+    for plot_conf in config.PLOTTER_CONF:
+        plotter = PlotterBuilder.build(
+            plot_conf,
+            samples,
+            id
+        )
+        plotter.plot()
     
 
 
@@ -113,12 +121,7 @@ def main(argv: list[str] = sys.argv[1:]):
             #no ids (one sensor)
             run(config, options,None)
     
-    # for every ConfigDetails in chosen ConfigList:
-    #   call reader with chosen config to read rows of data from all the files needed to fill given time range
-    #   process rows into a SampleList
-    #   
-    
-    # TODO: add SOLID implementations of functionality in wrapper
+    plt.show()
 
 if __name__ == "__main__":
     main()

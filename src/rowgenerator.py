@@ -14,6 +14,7 @@ class RowGenerator(Protocol):
         """
         ...
 
+
     def __iter__(self) -> Iterator[dict[str, Any]]:
         """
         generates and returns an iterator over the rows of data in a source
@@ -21,6 +22,7 @@ class RowGenerator(Protocol):
             Iterator[dict[str, Any]]: iterator over the rows of data
         """
         ...
+        
         
 class WebRow(RowGenerator,abc.ABC):
     """follows RowGenerator protocol"""
@@ -39,6 +41,7 @@ class WebRow(RowGenerator,abc.ABC):
             list[dict[str,Any]]: the processed response
         """
         ...
+        
         
     def __init__(self, source: str, **kwargs: Any) -> None:
         """ititializes this RowGenerator
@@ -59,6 +62,7 @@ class WebRow(RowGenerator,abc.ABC):
             raise ConnectionError("failed to connect to {}".format(source))
         
         self.rows: list[dict[str,Any]] = self.process_response(response,**kwargs)
+        
         
     def __iter__(self) -> Iterator[dict[str, Any]]:
         """
@@ -108,6 +112,7 @@ class WebRowRehsani(WebRow):
                 raise TypeError("argument '{}' found, but isn't an instance of '{}'".format(key,type(desired_class)))
         else:
             raise ValueError("kwargs doesn't contain key '{}'".format(key))
+    
     
     @staticmethod
     def process_response(response: bytes, **kwargs) -> list[dict[str,Any]]:
@@ -161,8 +166,10 @@ class WebRowRehsani(WebRow):
             for row in split_rows
         ]
         
+    
     def __init__(self, source: str, **kwargs: Any) -> None:
         super().__init__(source, **kwargs)
+    
     
     def __iter__(self) -> Iterator[dict[str, Any]]:
         return super().__iter__()

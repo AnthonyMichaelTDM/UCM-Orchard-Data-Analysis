@@ -1,9 +1,10 @@
 import abc
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Any, Callable, Iterable, Iterator, Optional, Protocol, SupportsIndex, Union, overload
+from typing import Any, Iterable, Iterator, NamedTuple, Optional, SupportsIndex, Union, overload
 
 from numpy import average
+
 
 @dataclass(frozen=True)
 class Sample():
@@ -12,6 +13,7 @@ class Sample():
     datapoints: dict[str, Any]
     ...
 
+
 class SampleList(list[Sample]):
     def __init__(
         self,
@@ -19,21 +21,28 @@ class SampleList(list[Sample]):
     ) -> None:
         self.samples: list[Sample] = list(samples) if samples else []
     
+    
     def __iter__(self) -> Iterator[Sample]: 
         return iter(self.samples)
+    
     
     def __len(self) -> int:
         return len(self.samples)
     
+    
     @overload
     def __getitem__(self,index: SupportsIndex)->Sample:
         ...
+    
+    
     @overload
     def __getitem__(self, index: slice)->list[Sample]:
         ...
     
+    
     def __getitem__(self, index: Union[SupportsIndex, slice]) -> Union[Sample, list[Sample]]:
         return self.samples[index]
+    
     
     def sort(self):
         """sort the samples in chronological order
@@ -52,8 +61,10 @@ class SampleList(list[Sample]):
         """
         self.samples.sort(key=lambda x: x.timestamp)
    
+    
     def extend(self, other: Iterable[Sample]) -> None:
         self.samples.extend(other)
+    
        
     def trim_to_timerange(self, start_date: datetime, end_date: datetime) -> None:
         """removes samples that don't fall between start_date and end_date
@@ -80,6 +91,7 @@ class SampleList(list[Sample]):
             for sample in iter(self.samples)
             if sample.timestamp >= start_date and sample.timestamp <= end_date
         ]
+       
         
     # TODO: add unit tests
     def get_smoothened_data(self, start:datetime, interval: timedelta):
@@ -112,18 +124,23 @@ class SampleList(list[Sample]):
                     datapoints=averaged_data
                 )
             )
-        
         return results
 
+
+class SampleDetails(NamedTuple):
+    important_fields: list[str]
+    field_types: list[Any]
+    timestamp_fieldname:str = "Date and Time"
+    timestamp_format:str = "%Y-%m-%d %H:%M:%S"
+
+
 class SampleBuilderBase(abc.ABC):
-    from details import SampleDetails
     @staticmethod
     @abc.abstractmethod
     def build(row: dict[str,Any], config: SampleDetails) -> Sample:
         ...
 
 class SampleBuilder(SampleBuilderBase):
-    from details import SampleDetails
     @staticmethod
     def build(row: dict[str,Any], config: SampleDetails) -> Sample:
         """returns an instance of Sample, with data parsed from row

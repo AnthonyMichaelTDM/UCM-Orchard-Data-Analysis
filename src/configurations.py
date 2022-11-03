@@ -1,13 +1,20 @@
+from datetime import datetime, timedelta
 from analysis import AnalyzeSapFlow
 import csv
 import os
-from typing import Iterable, Iterator, NamedTuple, Optional, SupportsIndex, Union, overload
-from details import PlotterDetails, ReaderDetails, SampleDetails, SensorDetails
-
+from typing import Callable, Iterable, Iterator, NamedTuple, Optional, SupportsIndex, Union, overload
+from plotter import PlotterDetails
+from reader import ReaderDetails
 from rowgenerator import WebRowRehsani
+from sample import SampleDetails
+
+FilenameGeneratorContract = Callable[[datetime, Optional[int]], str]
+class SensorDetails(NamedTuple):
+    valid_ids: list[int] | None
+    filename_generator: FilenameGeneratorContract
+    smoothening_interval: timedelta|None = timedelta(minutes=60)
 
 
-    
 class ConfigDetails(NamedTuple):
     title:str
     SENSOR_CONF: SensorDetails
@@ -16,6 +23,7 @@ class ConfigDetails(NamedTuple):
     PLOTTER_CONF: list[PlotterDetails]
     #TODO: additional commands and processing to run
 
+
 class ConfigList(list[ConfigDetails]):
     def __init__(
         self,
@@ -23,11 +31,14 @@ class ConfigList(list[ConfigDetails]):
     ) -> None:
         self.configurations: list[ConfigDetails] = list(configs) if configs else []
     
+    
     def __iter__(self) -> Iterator[ConfigDetails]: 
         return iter(self.configurations)
     
+    
     def __len(self) -> int:
         return len(self.configurations)
+    
     
     @overload
     def __getitem__(self,index: SupportsIndex)->ConfigDetails:
@@ -36,9 +47,11 @@ class ConfigList(list[ConfigDetails]):
     def __getitem__(self,index: slice)->list[ConfigDetails]:
         ...
     
+    
     def __getitem__(self, index: Union[SupportsIndex, slice]) -> Union[ConfigDetails, list[ConfigDetails]]:
        return self.configurations[index]
     ...
+
 
 class Configurations:
     CONFS: dict[str,ConfigList] = {
@@ -62,7 +75,7 @@ class Configurations:
                         figure_id=1,
                         y_list_gen=lambda samples, id: AnalyzeSapFlow.run_relativemoisture(
                             [sample.datapoints["Value 2"] for sample in samples],
-                            sensor_id=id,
+                            sensor_id=id,  # type: ignore
                             sensor_coefficients=[
                                 {"a": -0.0442015591095395, "b": 191.7556055613598}, #Sensor 1
                                 {"a": -0.04861278384829307, "b": 202.27735563973982}, #Sensor 2
@@ -72,7 +85,10 @@ class Configurations:
                                 {"a": -0.053728569077514346, "b": 212.98440419373264} #Sensor 6
                             ]
                         ),
-                        y_lable="Relative Moisture %",
+                        y_label="Relative Moisture %",
+                        figure_rows=1,
+                        figure_cols=2,
+                        subplot_index=1
                     ),
                     PlotterDetails(
                         figure_id=1,
@@ -80,7 +96,10 @@ class Configurations:
                             [sample.datapoints["Value 1"] for sample in samples],
                             [sample.timestamp for sample in samples]
                         ),
-                        y_lable="Sap Flux Density",
+                        y_label="Sap Flux Density",
+                        figure_rows=1,
+                        figure_cols=2,
+                        subplot_index=2
                     ),
                 ]
             ),         
@@ -102,9 +121,12 @@ class Configurations:
                     PlotterDetails(
                         figure_id=2,
                         y_list_gen=lambda samples, _id: [sample.datapoints[label] for sample in samples],
-                        y_lable=label
+                        y_label=label,
+                        figure_rows=2,
+                        figure_cols=3,
+                        subplot_index = i+1
                     )
-                    for label in ["Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"]
+                    for i,label in enumerate(["Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"])
                 ]
             ),
             ConfigDetails(
@@ -128,7 +150,7 @@ class Configurations:
                             sample.datapoints["Light (KLux)"] 
                             for sample in samples
                         ],
-                        y_lable="Light (KLux)",
+                        y_label="Light (KLux)",
                     )
                 ]
             )
@@ -153,13 +175,16 @@ class Configurations:
                         figure_id=1,
                         y_list_gen=lambda samples, id: AnalyzeSapFlow.run_relativemoisture(
                             [sample.datapoints["Value 2"] for sample in samples],
-                            sensor_id=id,
+                            sensor_id=id,  # type: ignore
                             sensor_coefficients=[ #TODO: calibrate the sensors (./other_scripts/calc_calibration_coefficients.py) with calibration data, for now just using averages from the almond sensors calibrations
                                 {"a":-0.05260665971323129, "b":207.7862341272133}
                                 for _ in range(1,7)
                             ]
                         ),
-                        y_lable="Sap Flow",
+                        y_label="Sap Flow",
+                        figure_rows=1,
+                        figure_cols=2,
+                        subplot_index=1
                     ),
                     PlotterDetails(
                         figure_id=1,
@@ -167,7 +192,10 @@ class Configurations:
                             [sample.datapoints["Value 1"] for sample in samples],
                             [sample.timestamp for sample in samples]
                         ),
-                        y_lable="Sap Flux Density",
+                        y_label="Sap Flux Density",
+                        figure_rows=1,
+                        figure_cols=2,
+                        subplot_index=2
                     ),
                 ]
             ),
@@ -189,9 +217,12 @@ class Configurations:
                     PlotterDetails(
                         figure_id=2,
                         y_list_gen=lambda samples, _id: [sample.datapoints[label] for sample in samples],
-                        y_lable=label
+                        y_label=label,
+                        figure_rows=2,
+                        figure_cols=3,
+                        subplot_index = i+1
                     )
-                    for label in ["Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"]
+                    for i,label in enumerate(["Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"])
                 ]
             ),
             ConfigDetails(
@@ -215,7 +246,7 @@ class Configurations:
                             sample.datapoints["Light (KLux)"] 
                             for sample in samples
                         ],
-                        y_lable="Light (KLux)",
+                        y_label="Light (KLux)",
                     )
                 ]
             )

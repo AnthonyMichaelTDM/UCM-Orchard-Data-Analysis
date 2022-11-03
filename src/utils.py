@@ -1,9 +1,8 @@
 
 from datetime import datetime
 from typing import Type
-from configurations import SampleDetails
-from details import FilenameGeneratorContract
-from sample import SampleBuilderBase, SampleList, SampleBuilder
+from configurations import FilenameGeneratorContract
+from sample import SampleBuilderBase, SampleDetails, SampleList, SampleBuilder
 from reader import Reader
 
 #TODO: add unit tests
@@ -16,6 +15,7 @@ def process_reader_into_samplelist(
         builder.build(row,sampleconf)
         for row in reader.rows[1:]
     ])
+
 
 #TODO: add unit tests
 def get_filenames_for_timerange(

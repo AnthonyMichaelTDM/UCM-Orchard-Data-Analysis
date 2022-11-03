@@ -11,6 +11,7 @@ class AnalyzeSapFlow():
         #a and b coefficients are the slope and y-int of a line that goes between the coords (ave wet, 100) and (ave dry, 0), ave wet and ave dry are calculated from the calibration files and are sensor specific
         return relative_moisture
     
+    
     @staticmethod
     def run_sapflux(value1: list[int], time: list[datetime]) -> list[Any]:
         sap_flux_density: list[float] = [
@@ -18,6 +19,7 @@ class AnalyzeSapFlow():
             for K in AnalyzeSapFlow.calc_K(value1, time)] 
         
         return sap_flux_density
+    
     
     @staticmethod
     def calc_K(value1:list[int], time:list[datetime]) -> list[float]:
