@@ -1,15 +1,17 @@
 import abc
+import csv
 from typing import Any, Iterator, Protocol
 
 import requests
 
 
 class RowGenerator(Protocol):
-    def __init__(self, source: str, **kwargs: Any) -> None:
+    def __init__(self, source: str, data_fields: list[str], **kwargs: Any) -> None:
         """ititializes the row generator, process Source into a collection of rows, the type of the rows is dict[str,Any]
 
         Args:
             source (str): the path/url/location where the data is located
+            data_fields (list[str]): the list of fields in the table
             **kwargs (any): additional arguments
         """
         ...
@@ -23,12 +25,38 @@ class RowGenerator(Protocol):
         """
         ...
         
+class CsvRow(RowGenerator):
+    def __init__(self, source: str, data_fields: list[str], **kwargs: Any) -> None:
+        """ititializes the row generator, process Source into a collection of rows, the type of the rows is dict[str,Any]
+
+        Args:
+            source (str): the path/url/location where the data is located
+            **kwargs (any): additional arguments
+        """
+        # open csv file
+        with open(source, mode='r', newline='') as csvfile:
+            dialect = csv.Sniffer().sniff(csvfile.read(1024))
+            csvfile.seek(0)
+            reader = csv.DictReader(csvfile, fieldnames=data_fields, dialect=dialect)
+
+            # convert data into useful format
+            self.rows: list[dict[str,Any]] = [x for x in reader][1::] #convert reader to a list, skipping first rows
+        
+
+
+    def __iter__(self) -> Iterator[dict[str, Any]]:
+        """
+        generates and returns an iterator over the rows of data in a source
+        Yields:
+            Iterator[dict[str, Any]]: iterator over the rows of data
+        """
+        return iter(self.rows)
         
 class WebRow(RowGenerator,abc.ABC):
     """follows RowGenerator protocol"""
     @staticmethod
     @abc.abstractmethod
-    def process_response(response: bytes, **kwargs) -> list[dict[str, Any]]:
+    def process_response(response: bytes, data_fields:list[str], **kwargs) -> list[dict[str, Any]]:
         """process the response from the webserver into a list of rows, represented by dictionaries
 
         Args:
@@ -43,7 +71,7 @@ class WebRow(RowGenerator,abc.ABC):
         ...
         
         
-    def __init__(self, source: str, **kwargs: Any) -> None:
+    def __init__(self, source: str, data_fields:list[str], **kwargs: Any) -> None:
         """ititializes this RowGenerator
         
         use the requests module to pull data from the provided url, 
@@ -61,7 +89,7 @@ class WebRow(RowGenerator,abc.ABC):
         except:
             raise ConnectionError("failed to connect to {}".format(source))
         
-        self.rows: list[dict[str,Any]] = self.process_response(response,**kwargs)
+        self.rows: list[dict[str,Any]] = self.process_response(response, data_fields,**kwargs)
         
         
     def __iter__(self) -> Iterator[dict[str, Any]]:
@@ -115,7 +143,7 @@ class WebRowRehsani(WebRow):
     
     
     @staticmethod
-    def process_response(response: bytes, **kwargs) -> list[dict[str,Any]]:
+    def process_response(response: bytes, data_fields:list[str], **kwargs) -> list[dict[str,Any]]:
         """process the response from the webserver into a list of rows, represented by dictionaries
 
         Args:
@@ -141,21 +169,16 @@ class WebRowRehsani(WebRow):
         """
         sample_separator:str = WebRowRehsani.get_arg_from_kwargs(kwargs,"sample_separator",str)
         data_separator:str = WebRowRehsani.get_arg_from_kwargs(kwargs, "data_separator", str)
-        data_fields:list[str] = WebRowRehsani.get_arg_from_kwargs(kwargs, "data_fields", list)
         #decode and re-order response
         split_response: list[str] = response.decode('utf-8').split(sep=sample_separator)
         split_rows: list[list[str]]  = [
             row.split(sep=data_separator)
-            for row in split_response[:-1] # reversed so we can add a row to the start with field headers (but after checking length)
+            for row in split_response # reversed so we can add a row to the start with field headers (but after checking length)
         ]
         
         #ensure that len(data_fields) is the same as the number of values in each sample
         if len(data_fields) != len(split_rows[0]):
             raise ValueError("provided data_fields doesn't match number of data_entries in response, {}!={}".format(len(data_fields),len(split_rows[0])))
-        
-        # add a row for field headers, then reverse the list
-        split_rows.extend([data_fields])
-        split_rows.reverse()
         
         # use field headers to convert rows list of lists into a list of dicts
         return [
@@ -167,8 +190,8 @@ class WebRowRehsani(WebRow):
         ]
         
     
-    def __init__(self, source: str, **kwargs: Any) -> None:
-        super().__init__(source, **kwargs)
+    def __init__(self, source: str, data_fields:list[str],**kwargs: Any) -> None:
+        super().__init__(source,data_fields, **kwargs)
     
     
     def __iter__(self) -> Iterator[dict[str, Any]]:

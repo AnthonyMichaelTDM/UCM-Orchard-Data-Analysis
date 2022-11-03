@@ -21,19 +21,20 @@ class Reader():
         self.additional.update(kwargs)
 
 
-    def read(self, filename:str) -> None:
+    def read(self, filename:str, data_fields:list[str]) -> None:
         """reads the data from 'filename', and appends its 'rows' list
 
         Args:
             filename (str): file name (at `self.base_path/filename`) to read from
         """
         row_gen_class = self.row_generator
-        row_iter = row_gen_class(os.path.join(self.base_path,filename), **self.additional)
+        row_iter = row_gen_class(os.path.join(self.base_path,filename), data_fields, **self.additional)
         self.rows.extend([row for row in row_iter])
 
 class ReaderDetails(NamedTuple):
     row_generator: Type[RowGenerator]
     data_source: str
+    data_fields: list[str]
     additional: dict[str,Any] = {}
     args: list[str] = []# for future CLI functionality
 
@@ -48,7 +49,7 @@ class ReaderBuilderBase(abc.ABC):
 class ReaderBuilder(ReaderBuilderBase):
     @staticmethod
     # TODO: add unit tests 
-    def ReaderBuilder( #can't just have ReaderDetails as a parameter because that'll cause circular dependency
+    def build( #can't just have ReaderDetails as a parameter because that'll cause circular dependency
         config: ReaderDetails,
         options: argparse.Namespace,
     ) -> Reader:

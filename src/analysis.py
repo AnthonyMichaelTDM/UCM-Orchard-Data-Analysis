@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 
 class AnalyzeSapFlow():    
@@ -28,15 +28,23 @@ class AnalyzeSapFlow():
         
         #calculate minT
         minT = AnalyzeSapFlow.calc_minT_list(deltaT, time)
-
+        
         #calc K
-        K = [ -(minT[i] - dt)/dt for i,dt in enumerate(deltaT)]
+        K: list[float] = []  
+        for i,dt in enumerate(deltaT):
+            day = time[i].date()
+            if day in minT:
+                mt = minT[day]
+                
+                K.append( -(mt - dt) / dt )
+            else:
+                K.append( 0 )
         
         return K
     
     
     @staticmethod
-    def calc_minT_list(deltat_list:list[float], datetime_list:list[datetime]) -> list[float]:
+    def calc_minT_list(deltat_list:list[float], datetime_list:list[datetime]) -> dict[date, float]:
         """given a list of ΔT's, and the equally sized list of datetimes those ΔT's were calculated for, 
         return a list of minT's (the average ΔT between the hours of 0 and 7 (inclusive) (midnight to 7am))
 
@@ -50,11 +58,10 @@ class AnalyzeSapFlow():
         Returns:
             List[float]: a list of the average ΔT between the hours of 0 and 7 (inclusive) (midnight to 7am)
         """
-        tempminT:dict[datetime,tuple[float,int]] = {} # dictionary with time as key and a tuple of minT for the day AND dt readings throughout the day as values
-        prevdatetime: datetime = next(iter(datetime_list))#previous dateti, used in loop
+        tempminT:dict[date,float] = {} # dictionary with time as key and a tuple of minT for the day AND dt readings throughout the day as values
+        prevdatetime: datetime = datetime_list[0] #previous dateti, used in loop
         nightreadingstotaldt: float = 0.0 #total dt between midnight and 7am for the day being processed
         nightreadingscount: int= 0 # count of the dt's between midnight and 7am for the day being processed
-        dayreadingscount: int = 1 # count of readings in the day being processed
         
         datetimelen: int = len(datetime_list) #stored as a variable because it's used in 3 places (one of them is a loop), calculating the length each time is inefficient
         deltatlen: int = len(deltat_list) #stored for consistency
@@ -63,7 +70,7 @@ class AnalyzeSapFlow():
         
         #run what would be the first iteration outside of the loop to initialize everything
         if prevdatetime.hour >= 0 and prevdatetime.hour <= 7:
-            nightreadingstotaldt = next(iter(deltat_list))
+            nightreadingstotaldt = deltat_list[0]
             nightreadingscount = 1
             
         #create dict w/ date as key and deltaT as value
@@ -76,30 +83,19 @@ class AnalyzeSapFlow():
                     #if night and same day, update values
                     nightreadingstotaldt += dt
                     nightreadingscount += 1
-                    
-                #update count for day
-                dayreadingscount += 1
             else:
                 #for mint calculations, ignore keys where hour is not between 0 and 7
                 if currdatetime.hour >= 0 and currdatetime.hour <= 7:
                     # if night but not same day, store past values, then reset values 
-                    tempminT[datetime(prevdatetime.year,prevdatetime.month,prevdatetime.day)] = (nightreadingstotaldt / nightreadingscount,dayreadingscount)
+                    tempminT[prevdatetime.date()] = nightreadingstotaldt / nightreadingscount
                     nightreadingstotaldt = dt
                     nightreadingscount = 1
-                    
-                #reset count for day
-                dayreadingscount = 1
             
             #because mint values are stored when the "next day" starts, it is necessary to explicityly store the data on the last iteration of the loop so that the data from the last day isn't ignored
             if i+1 >= datetimelen-1: #the +1 is because len returns the number of elements in an array, not the index of the last element (which is 1 less)
                                     #the -1 is there because we skip the first element of datetime when making the enumerated iterator this loop iterates over
-                tempminT[datetime(prevdatetime.year,prevdatetime.month,prevdatetime.day)] = (nightreadingstotaldt / nightreadingscount,dayreadingscount)
+                tempminT[prevdatetime.date()] = nightreadingstotaldt / nightreadingscount
             
             prevdatetime = currdatetime
-            
-        #build up minT list of same size as datetime_list, and return it
-        minT_list:list[float] = []
-        for t_tup in tempminT.values():
-            minT_list.extend( [float(t_tup[0]) for _ in range(t_tup[1])] )
-        return minT_list
+        return tempminT
     

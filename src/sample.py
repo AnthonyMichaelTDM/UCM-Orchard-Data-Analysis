@@ -94,8 +94,9 @@ class SampleList(list[Sample]):
        
         
     # TODO: add unit tests
+    # TODO: move this over to plotter, not every piece of data needs to be smoothened
     def get_smoothened_data(self, start:datetime, interval: timedelta):
-        results = SampleList()
+        results: SampleList = SampleList()
         intervals: dict[datetime, list[Sample]] = {}
         
         # group samples into time groups
@@ -108,23 +109,25 @@ class SampleList(list[Sample]):
                 intervals[timegroup].append(sample)
                 
         # calculate average of time groups, and rebuild self
-        for timegroup, samples in intervals.items():
-            averaged_data = {
-                label: average([
-                    data
-                    for data in [sample.datapoints[label] for sample in samples]
-                ])
-                for label in samples[0].important_fields
-                if samples[0].datapoints[label].isnumeric()
-            }
-            results.append(
-                Sample(
-                    timestamp=timegroup, 
-                    important_fields=list(averaged_data.keys()), 
-                    datapoints=averaged_data
-                )
+        return SampleList([
+            Sample(
+                timestamp=timegroup, 
+                important_fields=list([
+                    label 
+                    for label in samples[0].important_fields
+                    #if str(samples[0].datapoints[label]).isnumeric()
+                ]), 
+                datapoints={
+                    label: average([
+                        data
+                        for data in [sample.datapoints[label] for sample in samples]
+                    ])
+                    for label in samples[0].important_fields
+                    #if str(samples[0].datapoints[label]).isnumeric()
+                }
             )
-        return results
+            for timegroup, samples in intervals.items()
+        ])
 
 
 class SampleDetails(NamedTuple):

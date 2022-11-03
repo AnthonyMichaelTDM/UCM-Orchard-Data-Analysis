@@ -1,11 +1,10 @@
 from datetime import datetime, timedelta
 from analysis import AnalyzeSapFlow
-import csv
 import os
 from typing import Callable, Iterable, Iterator, NamedTuple, Optional, SupportsIndex, Union, overload
 from plotter import PlotterDetails
 from reader import ReaderDetails
-from rowgenerator import WebRowRehsani
+from rowgenerator import CsvRow, WebRowRehsani
 from sample import SampleDetails
 
 FilenameGeneratorContract = Callable[[datetime, Optional[int]], str]
@@ -54,16 +53,17 @@ class ConfigList(list[ConfigDetails]):
 
 
 class Configurations:
-    CONFS: dict[str,ConfigList] = {
-        "almond": ConfigList([
+    CONFS: dict[str,list[ConfigDetails]] = {
+        "almond": [
             ConfigDetails(
-                title = "Almond sap and moisture",
+                title = "Almond S&M",
                 SENSOR_CONF=SensorDetails(
                     valid_ids=list(range(1,7)),
                     filename_generator=lambda date, id: "Data_TREWid{id}_{year}_{month:0>2}_almond.csv".format(id=id,year=date.year%100,month=date.month)
                 ),
                 READER_CONF=ReaderDetails(
-                    row_generator=csv.DictReader,  # type: ignore
+                    row_generator=CsvRow,
+                    data_fields=["Date and Time", "Field","Sensor ID", "Value 1","Value 2"],
                     data_source=os.path.join(os.path.realpath(os.path.join(os.path.dirname(__file__), '..')), "data"),
                 ),
                 SAMPLE_CONF=SampleDetails(
@@ -86,8 +86,8 @@ class Configurations:
                             ]
                         ),
                         y_label="Relative Moisture %",
-                        figure_rows=1,
-                        figure_cols=2,
+                        figure_rows=2,
+                        figure_cols=1,
                         subplot_index=1
                     ),
                     PlotterDetails(
@@ -97,8 +97,8 @@ class Configurations:
                             [sample.timestamp for sample in samples]
                         ),
                         y_label="Sap Flux Density",
-                        figure_rows=1,
-                        figure_cols=2,
+                        figure_rows=2,
+                        figure_cols=1,
                         subplot_index=2
                     ),
                 ]
@@ -110,7 +110,8 @@ class Configurations:
                     filename_generator=lambda date, _id: "Data_weather_{year}_{month:0>2}_almond.csv".format(year=date.year%100,month=date.month)
                 ),
                 READER_CONF=ReaderDetails(
-                    row_generator=csv.DictReader,  # type: ignore
+                    row_generator=CsvRow,
+                    data_fields= ["Date and Time","Field","Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"],
                     data_source=os.path.join(os.path.realpath(os.path.join(os.path.dirname(__file__), '..')), "data"),
                 ),
                 SAMPLE_CONF=SampleDetails(
@@ -118,15 +119,26 @@ class Configurations:
                     field_types=      [float,               float,          float,              float,      float],
                 ),
                 PLOTTER_CONF=[
-                    PlotterDetails(
-                        figure_id=2,
-                        y_list_gen=lambda samples, _id: [sample.datapoints[label] for sample in samples],
-                        y_label=label,
-                        figure_rows=2,
-                        figure_cols=3,
-                        subplot_index = i+1
+                    PlotterDetails(figure_id=2,
+                        y_list_gen=lambda samples, _id: [sample.datapoints["Temperature [℃]"] for sample in samples],
+                        y_label="Temperature [℃]",figure_rows=3,figure_cols=2,subplot_index = 1
+                    ),
+                    PlotterDetails( figure_id=2,
+                        y_list_gen=lambda samples, _id: [sample.datapoints["Humidity [RH%]"] for sample in samples],
+                        y_label="Humidity [RH%]",figure_rows=3,figure_cols=2,subplot_index = 2
+                    ),
+                    PlotterDetails(figure_id=2,
+                        y_list_gen=lambda samples, _id: [sample.datapoints["Pressure [hPa]"] for sample in samples],
+                        y_label="Pressure [hPa]",figure_rows=3,figure_cols=2,subplot_index = 3
+                    ),
+                    PlotterDetails(figure_id=2,
+                        y_list_gen=lambda samples, _id: [sample.datapoints["Altitude [m]"] for sample in samples],
+                        y_label="Altitude [m]",figure_rows=3,figure_cols=2,subplot_index = 4
+                    ),
+                    PlotterDetails(figure_id=2,
+                        y_list_gen=lambda samples, _id: [sample.datapoints["VOC [kΩ]"] for sample in samples],
+                        y_label="VOC [kΩ]",figure_rows=3,figure_cols=2,subplot_index = 5
                     )
-                    for i,label in enumerate(["Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"])
                 ]
             ),
             ConfigDetails(
@@ -136,7 +148,8 @@ class Configurations:
                     filename_generator=lambda date, id: "Data_lux_{year}_{month:0>2}_almond.csv".format(year=date.year%100,month=date.month)
                 ),
                 READER_CONF=ReaderDetails(
-                    row_generator=csv.DictReader,  # type: ignore
+                    row_generator=CsvRow,
+                    data_fields= ["Date and Time", "Light (KLux)"],
                     data_source=os.path.join(os.path.realpath(os.path.join(os.path.dirname(__file__), '..')), "data"),
                 ),
                 SAMPLE_CONF=SampleDetails(
@@ -154,16 +167,17 @@ class Configurations:
                     )
                 ]
             )
-        ]),
-        "pistachio": ConfigList([
+        ],
+        "pistachio": [
             ConfigDetails(
-                title = "Pistachio sap and moisture",
+                title = "Pistachio S&M",
                 SENSOR_CONF=SensorDetails(
                     valid_ids=list(range(1,7)),
                     filename_generator=lambda date, id: "trew/?id={id}&m={month}&y={year}".format(id=id,year=date.year,month=date.month)
                 ),
                 READER_CONF=ReaderDetails(
                     row_generator=WebRowRehsani,
+                    data_fields=["Date and Time", "Value 1","Value 2"],
                     data_source="http://192.168.0.116/rehsani_local"
                 ),
                 SAMPLE_CONF=SampleDetails(
@@ -207,6 +221,7 @@ class Configurations:
                 ),
                 READER_CONF=ReaderDetails(
                     row_generator=WebRowRehsani,
+                    data_fields=["Date and Time", "Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"],
                     data_source="http://192.168.0.116/rehsani_local"
                 ),
                 SAMPLE_CONF=SampleDetails(
@@ -214,15 +229,26 @@ class Configurations:
                     field_types=[float,float,float,float,float]
                 ),
                 PLOTTER_CONF=[
-                    PlotterDetails(
-                        figure_id=2,
-                        y_list_gen=lambda samples, _id: [sample.datapoints[label] for sample in samples],
-                        y_label=label,
-                        figure_rows=2,
-                        figure_cols=3,
-                        subplot_index = i+1
+                    PlotterDetails(figure_id=2,
+                        y_list_gen=lambda samples, _id: [sample.datapoints["Temperature [℃]"] for sample in samples],
+                        y_label="Temperature [℃]",figure_rows=3,figure_cols=2,subplot_index = 1
+                    ),
+                    PlotterDetails( figure_id=2,
+                        y_list_gen=lambda samples, _id: [sample.datapoints["Humidity [RH%]"] for sample in samples],
+                        y_label="Humidity [RH%]",figure_rows=3,figure_cols=2,subplot_index = 2
+                    ),
+                    PlotterDetails(figure_id=2,
+                        y_list_gen=lambda samples, _id: [sample.datapoints["Pressure [hPa]"] for sample in samples],
+                        y_label="Pressure [hPa]",figure_rows=3,figure_cols=2,subplot_index = 3
+                    ),
+                    PlotterDetails(figure_id=2,
+                        y_list_gen=lambda samples, _id: [sample.datapoints["Altitude [m]"] for sample in samples],
+                        y_label="Altitude [m]",figure_rows=3,figure_cols=2,subplot_index = 4
+                    ),
+                    PlotterDetails(figure_id=2,
+                        y_list_gen=lambda samples, _id: [sample.datapoints["VOC [kΩ]"] for sample in samples],
+                        y_label="VOC [kΩ]",figure_rows=3,figure_cols=2,subplot_index = 5
                     )
-                    for i,label in enumerate(["Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"])
                 ]
             ),
             ConfigDetails(
@@ -233,6 +259,7 @@ class Configurations:
                 ),
                 READER_CONF=ReaderDetails(
                     row_generator=WebRowRehsani,
+                    data_fields=["Date and Time", "Temperature [℃]","Humidity [RH%]","Pressure [hPa]","Altitude [m]","VOC [kΩ]"],
                     data_source="http://192.168.0.116/rehsani_local"
                 ),
                 SAMPLE_CONF=SampleDetails(
@@ -250,5 +277,5 @@ class Configurations:
                     )
                 ]
             )
-        ])
+        ]
     }

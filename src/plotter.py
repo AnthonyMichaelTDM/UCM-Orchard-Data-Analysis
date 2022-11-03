@@ -32,12 +32,9 @@ class Plotter():
     def plot(self):
         plt.figure(self.figure_id)
         plt.subplot(self.figure_rows,self.figure_cols,self.subplot_index)
-        if not isinstance(self.sensor_id, type(None)):
-            plt.plot(self.x,self.y,linewidth=1, label="{}".format(self.sensor_id))
-            plt.legend()
-        else:
-            plt.plot(self.x,self.y)
-        plt.title("{} vs {}\n".format(self.y_label, self.x_label))
+        plt.title("\n{} vs {}".format(self.y_label, self.x_label))
+        plt.xticks(rotation=50)
+        plt.plot(self.x,self.y)
 
 
 plotter_list_generator_contract = Callable[[SampleList,Optional[int]],list[Any]]
