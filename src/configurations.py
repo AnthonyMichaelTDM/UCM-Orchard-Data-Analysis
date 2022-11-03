@@ -141,32 +141,32 @@ class Configurations:
                     )
                 ]
             ),
-            ConfigDetails(
-                title = "Almond lux",
-                SENSOR_CONF=SensorDetails(
-                    valid_ids=[1,2],
-                    filename_generator=lambda date, id: "Data_lux_{year}_{month:0>2}_almond.csv".format(year=date.year%100,month=date.month)
-                ),
-                READER_CONF=ReaderDetails(
-                    row_generator=CsvRow,
-                    data_fields= ["Date and Time", "Light (KLux)"],
-                    data_source=os.path.join(os.path.realpath(os.path.join(os.path.dirname(__file__), '..')), "data"),
-                ),
-                SAMPLE_CONF=SampleDetails(
-                    important_fields= ["Light (KLux)"],
-                    field_types=      [float]
-                ),
-                PLOTTER_CONF=[
-                    PlotterDetails(
-                        figure_id=3,
-                        y_list_gen=lambda samples, _id: [
-                            sample.datapoints["Light (KLux)"] 
-                            for sample in samples
-                        ],
-                        y_label="Light (KLux)",
-                    )
-                ]
-            )
+            # ConfigDetails(
+            #     title = "Almond lux",
+            #     SENSOR_CONF=SensorDetails(
+            #         valid_ids=[1,2],
+            #         filename_generator=lambda date, id: "Data_lux_{year}_{month:0>2}_almond.csv".format(year=date.year%100,month=date.month)
+            #     ),
+            #     READER_CONF=ReaderDetails(
+            #         row_generator=CsvRow,
+            #         data_fields= ["Date and Time", "Light (KLux)"],
+            #         data_source=os.path.join(os.path.realpath(os.path.join(os.path.dirname(__file__), '..')), "data"),
+            #     ),
+            #     SAMPLE_CONF=SampleDetails(
+            #         important_fields= ["Light (KLux)"],
+            #         field_types=      [float]
+            #     ),
+            #     PLOTTER_CONF=[
+            #         PlotterDetails(
+            #             figure_id=3,
+            #             y_list_gen=lambda samples, _id: [
+            #                 sample.datapoints["Light (KLux)"] 
+            #                 for sample in samples
+            #             ],
+            #             y_label="Light (KLux)",
+            #         )
+            #     ]
+            # )
         ],
         "pistachio": [
             ConfigDetails(

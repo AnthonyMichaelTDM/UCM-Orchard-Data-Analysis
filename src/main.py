@@ -143,8 +143,8 @@ def main(argv: list[str] = sys.argv[1:]):
     
     # using cli options, set up a Settings object
     # for testing:
-    options = get_options(argv=["-s","2022-05-09","-e","2022-05-28","-c","almond"])
-    #options = get_options(argv)
+    #options = get_options(argv=["-s","2022-05-09","-e","2022-05-28","-c","almond"])
+    options = get_options(argv)
     
     sensors = ["sap","weather","lux"]
     ids = [getattr(options, "sap_id"),getattr(options, "weather_id"),getattr(options, "lux_id") ]
@@ -161,8 +161,7 @@ def main(argv: list[str] = sys.argv[1:]):
             else:
                 #no ids (one sensor)
                 run(config, options,None)
-            plt.show()
-    
+        plt.show()
     else:
         raise RuntimeError("invalid config")
 
